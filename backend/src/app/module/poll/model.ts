@@ -10,7 +10,7 @@ export interface IPoll {
     status: 'draft' | 'active' | 'ended';
     totalVotes: number;
     totalParticipants: number;
-    createdBy: Schema.Types.ObjectId;
+    createdBy: mongoose.Types.ObjectId;
 }
 
 
@@ -57,7 +57,7 @@ interface IOption {
 }
 export interface IQuestion {
     question: string;
-    pollId: Schema.Types.ObjectId;
+    pollId: mongoose.Types.ObjectId;
     questionNumber: number;
     options: IOption[];
     createdAt: Date;
