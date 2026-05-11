@@ -1,16 +1,19 @@
 import bcrypt from 'bcryptjs';
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
-const hashPassword = async (password: string): Promise<string> => {
+const generateHash = async (password: string): Promise<string> => {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
 };
 
-const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
+const compareHash = async (password: string, hashedPassword: string): Promise<boolean> => {
     return await bcrypt.compare(password, hashedPassword);
 };
 
 
+const generateToken = (payload: object, secret: Secret, options?: SignOptions): string => {
+    return jwt.sign(payload, secret, options);
+};
 
 const generateAccessRefreshToken = (
     payload: object
@@ -27,24 +30,14 @@ const generateAccessRefreshToken = (
         expiresIn: process.env.JWT_REFRESH_EXPIRY as SignOptions["expiresIn"],
     };
 
-    const accessToken = jwt.sign(
-        payload,
-        accessSecret,
-        accessOptions
-    );
-
-    const refreshToken = jwt.sign(
-        payload,
-        refreshSecret,
-        refreshOptions
-    );
+    const accessToken = generateToken(payload, accessSecret, accessOptions);
+    const refreshToken = generateToken(payload, refreshSecret, refreshOptions);
 
     return {
         accessToken,
         refreshToken,
     };
 };
-
 
 const verifyToken = (token: string, secret: Secret): object | string => {
     try {
@@ -54,6 +47,23 @@ const verifyToken = (token: string, secret: Secret): object | string => {
     }
 };
 
+const verifyAccessToken = (token: string): object | string => {
+    const secret: Secret = process.env.JWT_ACCESS_SECRET!;
+    return verifyToken(token, secret);
+};
+
+const verifyRefreshToken = (token: string): object | string => {
+    const secret: Secret = process.env.JWT_REFRESH_SECRET!;
+    return verifyToken(token, secret);
+};
 
 
-export { hashPassword, comparePassword, generateAccessRefreshToken, verifyToken };
+
+
+export {
+    generateHash,
+    compareHash,
+    generateAccessRefreshToken,
+    verifyAccessToken,
+    verifyRefreshToken
+};

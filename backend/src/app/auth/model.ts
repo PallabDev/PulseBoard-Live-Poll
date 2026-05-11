@@ -5,7 +5,10 @@ export interface IUser extends Document {
     email: string;
     password: string;
     avatarUrl?: string;
-    emailResetToken?: string;
+    isVerified: boolean;
+    emailVerificationToken?: string;
+    emailVerificationTokenExpires?: Date;
+    passwordResetToken?: string;
     refreshToken?: string;
 
     createdAt: Date;
@@ -17,7 +20,10 @@ const UserSchema: Schema = new Schema<IUser>({
     email: { type: String, required: true, unique: true, index: true },
     password: { type: String, required: true },
     avatarUrl: { type: String },
-    emailResetToken: { type: String },
+    isVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String },
+    emailVerificationTokenExpires: { type: Date },
+    passwordResetToken: { type: String },
     refreshToken: { type: String },
 }, { timestamps: true });
 

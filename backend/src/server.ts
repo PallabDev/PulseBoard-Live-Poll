@@ -1,10 +1,6 @@
+import './app/config/env.js'
 import { createServer } from 'node:http';
 import createApp from './app/app.js';
-import dotenv from "dotenv";
-dotenv.config({
-    path: './.env',
-    quiet: true,
-});
 import { connectDB } from './app/db/conn.js';
 
 const startServer = async () => {
