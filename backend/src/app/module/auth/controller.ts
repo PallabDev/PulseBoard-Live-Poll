@@ -1,11 +1,11 @@
 import { type Request, type Response } from "express";
-import ApiError from "../utils/ApiError.js";
-import ApiResponse from "../utils/ApiResponse.js";
+import ApiError from "../../common/utils/ApiError.js";
+import ApiResponse from "../../common/utils/ApiResponse.js";
 import { signupSchema, signinSchema } from "./validator.js";
 import { ZodError } from "zod";
 import { signupService } from "./services.js";
 import { signinService } from "./services.js";
-import { CookieConfiguration } from "../config/cookies.config.js"
+import { CookieConfiguration } from "../../common/config/cookies.config.js"
 export const signup = async (req: Request, res: Response) => {
 
     const { fullname, email, password } = req.body;
@@ -80,4 +80,16 @@ export const signin = async (req: Request, res: Response) => {
 
         return res.status(500).json(ApiResponse.error("Internal server error"));
     }
+}
+
+
+export const userinfo = async (req: Request, res: Response) => {
+    return res.status(200).json(ApiResponse.success("User fetched successfully", req.user));
+}
+
+
+export const signout = async (req: Request, res: Response) => {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    return res.status(200).json(ApiResponse.success("User signed out successfully"));
 }

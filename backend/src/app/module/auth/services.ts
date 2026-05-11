@@ -1,7 +1,7 @@
 import User from "./model.js";
-import { generateHash, compareHash, generateAccessRefreshToken, verifyAccessToken, verifyRefreshToken } from "../utils/tokens.js";
-import ApiError from "../utils/ApiError.js";
-import { sendEmail, type EmailOptions } from "../utils/Mail.js";
+import { generateHash, compareHash, generateAccessRefreshToken, verifyAccessToken, verifyRefreshToken } from "../../common/utils/tokens.js";
+import ApiError from "../../common/utils/ApiError.js";
+import { sendEmail, type EmailOptions } from "../../common/utils/Mail.js";
 import crypto from "crypto";
 
 export const signupService = async (fullname: string, email: string, password: string) => {

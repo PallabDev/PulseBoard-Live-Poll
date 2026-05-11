@@ -1,5 +1,5 @@
 import express, { type Response } from 'express';
-import authRoutes from './auth/routes.js';
+import authRoutes from './module/auth/routes.js';
 import cookieParser from "cookie-parser";
 const createApp = () => {
     const app = express();

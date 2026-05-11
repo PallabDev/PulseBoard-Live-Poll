@@ -1,7 +1,7 @@
-import './app/config/env.js'
+import './app/common/config/env.js'
 import { createServer } from 'node:http';
 import createApp from './app/app.js';
-import { connectDB } from './app/db/conn.js';
+import { connectDB } from './app/common/db/conn.js';
 
 const startServer = async () => {
     await connectDB();
