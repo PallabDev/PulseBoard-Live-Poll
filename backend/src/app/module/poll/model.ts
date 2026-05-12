@@ -8,6 +8,8 @@ export interface IPoll {
     pollStartTime: Date | null;
     pollEndTime: Date | null;
     isAnonymousAllowed: boolean;
+    shareCode: string;
+    analyticsCode: string;
     status: 'draft' | 'active' | 'ended';
     totalVotes: number;
     totalParticipants: number;
@@ -22,6 +24,18 @@ const PollSchema: Schema = new Schema<IPoll>({
     pollStartTime: { type: Date, default: null },
     pollEndTime: { type: Date, default: null },
     isAnonymousAllowed: { type: Boolean, required: true, default: false },
+    shareCode: {
+        type: String,
+        required: true,
+        unique: true,
+        default: () => new mongoose.Types.ObjectId().toString(),
+    },
+    analyticsCode: {
+        type: String,
+        required: true,
+        unique: true,
+        default: () => new mongoose.Types.ObjectId().toString(),
+    },
 
     status: {
         type: String,

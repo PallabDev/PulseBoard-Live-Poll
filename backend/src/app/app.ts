@@ -1,6 +1,7 @@
 import express, { type Response } from 'express';
 import authRoutes from './module/auth/routes.js';
 import pollRoutes from './module/poll/routes.js';
+import publicRoutes from './module/public/routes.js';
 import cookieParser from "cookie-parser";
 const createApp = () => {
     const app = express();
@@ -18,6 +19,7 @@ const createApp = () => {
     // auth routes
     app.use('/api/auth', authRoutes);
     app.use('/api/poll', pollRoutes);
+    app.use('/api/public', publicRoutes);
 
 
 
