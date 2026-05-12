@@ -6,8 +6,16 @@ import type { ICreatePoll, ICreateQuestion, IUpdateOption, IUpdatePoll, IUpdateQ
 type CreatePollServiceInput = ICreatePoll & {
     userId: mongoose.Types.ObjectId;
 };
-export const createPollService = async ({ pollName, pollDescription, pollStartTime, pollEndTime, isAnonymousAllowed, userId }: CreatePollServiceInput) => {
-    const poll = new Poll({ pollName, pollDescription, pollStartTime, pollEndTime, isAnonymousAllowed, createdBy: userId });
+export const createPollService = async ({ pollName, pollDescription, pollDurationInMinutes, isAnonymousAllowed, userId }: CreatePollServiceInput) => {
+    const poll = new Poll({
+        pollName,
+        pollDescription,
+        pollDurationInMinutes,
+        pollStartTime: null,
+        pollEndTime: null,
+        isAnonymousAllowed,
+        createdBy: userId
+    });
     const savedPoll = await poll.save();
     return savedPoll;
 }
@@ -190,9 +198,13 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
     }
 
     if (pollDurationInMinutes !== undefined) {
-        poll.pollEndTime = new Date(
-            poll.pollStartTime.getTime() + pollDurationInMinutes * 60 * 1000
-        );
+        poll.pollDurationInMinutes = pollDurationInMinutes;
+
+        if (poll.pollStartTime) {
+            poll.pollEndTime = new Date(
+                poll.pollStartTime.getTime() + pollDurationInMinutes * 60 * 1000
+            );
+        }
     }
 
     if (isAnonymousAllowed !== undefined) {
@@ -200,6 +212,14 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
     }
 
     if (status !== undefined) {
+        if (status === "active" && poll.status !== "active") {
+            const startTime = new Date();
+            poll.pollStartTime = startTime;
+            poll.pollEndTime = new Date(
+                startTime.getTime() + poll.pollDurationInMinutes * 60 * 1000
+            );
+        }
+
         poll.status = status;
     }
 

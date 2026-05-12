@@ -68,8 +68,11 @@ export const createPollSchema = z.object({
     pollDescription: z.string().min(3, {
         message: "Poll description must be at least 3 characters long",
     }),
-    pollStartTime: z.date(),
-    pollEndTime: z.date(),
+    pollDurationInMinutes: z.number().int().min(1, {
+        message: "Poll duration must be at least 1 minute",
+    }).max(30, {
+        message: "Poll duration can not be more than 30 minutes",
+    }),
     isAnonymousAllowed: z.boolean().default(false),
 });
 
@@ -86,7 +89,7 @@ export const updatePollSchema = z.object({
         message: "Poll duration can not be more than 30 minutes",
     }).optional(),
     isAnonymousAllowed: z.boolean().optional(),
-    status: z.enum(["draft", "active", "ended"]).optional(),
+    status: z.enum(["draft", "active"]).optional(),
 }).refine(
     (data) => Object.keys(data).length > 0,
     {

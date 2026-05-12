@@ -4,8 +4,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IPoll {
     pollName: string;
     pollDescription: string;
-    pollStartTime: Date;
-    pollEndTime: Date;
+    pollDurationInMinutes: number;
+    pollStartTime: Date | null;
+    pollEndTime: Date | null;
     isAnonymousAllowed: boolean;
     status: 'draft' | 'active' | 'ended';
     totalVotes: number;
@@ -17,8 +18,9 @@ export interface IPoll {
 const PollSchema: Schema = new Schema<IPoll>({
     pollName: { type: String, required: true },
     pollDescription: { type: String, required: true },
-    pollStartTime: { type: Date, required: true },
-    pollEndTime: { type: Date, required: true },
+    pollDurationInMinutes: { type: Number, required: true },
+    pollStartTime: { type: Date, default: null },
+    pollEndTime: { type: Date, default: null },
     isAnonymousAllowed: { type: Boolean, required: true, default: false },
 
     status: {
