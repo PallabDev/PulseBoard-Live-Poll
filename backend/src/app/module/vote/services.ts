@@ -1,34 +1,18 @@
-import type mongoose from 'mongoose';
+import type { Types } from 'mongoose';
 import ApiError from '../../common/utils/ApiError.js';
 import Vote from './model.js';
 import { Poll, Question } from '../poll/model.js';
-import { getPublicAnalyticsSnapshotByCode, getPublicPollSnapshotByShareCode } from '../public/services.js';
+import { getPollVoteStats, getPublicAnalyticsSnapshotByCode, getPublicPollSnapshotByShareCode } from '../public/services.js';
 import { emitPublicAnalyticsUpdate, emitPublicPollUpdate } from '../../common/socket.js';
 
 type SubmitSocketVoteInput = {
     pollId: string;
     questionId: string;
     optionId: string;
-    userId?: mongoose.Types.ObjectId;
+    userId?: Types.ObjectId;
     userFingerPrint?: string;
     firstName?: string;
     lastName?: string;
-};
-
-const buildParticipantFilter = ({
-    pollId,
-    userId,
-    userFingerPrint,
-}: {
-    pollId: string;
-    userId?: mongoose.Types.ObjectId;
-    userFingerPrint?: string;
-}) => {
-    if (userId) {
-        return { pollId, userId };
-    }
-
-    return { pollId, userFingerPrint };
 };
 
 export const submitSocketVoteService = async ({
@@ -74,21 +58,13 @@ export const submitSocketVoteService = async ({
 
     const existingQuestionVote = await Vote.collection.findOne({
         pollId: poll._id,
-        questionId,
+        questionId: question._id,
         ...(userId ? { userId } : { userFingerPrint }),
     });
 
     if (existingQuestionVote) {
         throw new ApiError(409, 'This participant has already answered this question');
     }
-
-    const participantFilter = buildParticipantFilter({
-        pollId: String(poll._id),
-        userId,
-        userFingerPrint,
-    });
-
-    const priorParticipation = await Vote.collection.findOne(participantFilter);
 
     const vote = await Vote.create({
         pollId: poll._id,
@@ -103,11 +79,9 @@ export const submitSocketVoteService = async ({
     selectedOption.votes = (selectedOption.votes ?? 0) + 1;
     await question.save();
 
-    poll.totalVotes = (poll.totalVotes ?? 0) + 1;
-
-    if (!priorParticipation) {
-        poll.totalParticipants = (poll.totalParticipants ?? 0) + 1;
-    }
+    const voteStats = await getPollVoteStats(poll._id);
+    poll.totalVotes = voteStats.totalVotes;
+    poll.totalParticipants = voteStats.totalParticipants;
 
     await poll.save();
 

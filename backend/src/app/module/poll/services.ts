@@ -226,3 +226,23 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
     const updatedPoll = await poll.save();
     return updatedPoll;
 }
+
+export const getAllPollsService = async (userId: mongoose.Types.ObjectId) => {
+    const polls = await Poll.find({ createdBy: userId }).sort({ createdAt: -1 });
+    return polls;
+}
+
+export const getPollByIdService = async (pollId: string, userId: mongoose.Types.ObjectId) => {
+    const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
+    
+    if (!poll) {
+        throw new ApiError(404, "Poll not found");
+    }
+
+    const questions = await Question.find({ pollId }).sort({ questionNumber: 1 });
+    
+    return {
+        poll,
+        questions
+    };
+}

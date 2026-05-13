@@ -29,14 +29,10 @@ export const submitVoteSocketSchema = z.object({
 }).superRefine((data, ctx) => {
     const anonymousFields = [data.userFingerPrint, data.firstName, data.lastName].filter(Boolean);
 
-    if (!data.accessToken && anonymousFields.length === 0) {
-        ctx.addIssue({
-            code: 'custom',
-            message: 'Either accessToken or anonymous voter details are required',
-            path: ['accessToken'],
-        });
-    }
-
+    // If no accessToken in payload and no anonymous fields, we'll check cookies in the socket handler.
+    // So we don't strictly fail here if anonymousFields.length === 0, 
+    // unless we definitely don't have a token in cookies (which we can't know here).
+    // However, if they provided partial anonymous fields, that's still an error.
     if (!data.accessToken && anonymousFields.length > 0 && anonymousFields.length < 3) {
         ctx.addIssue({
             code: 'custom',

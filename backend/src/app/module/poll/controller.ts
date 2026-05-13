@@ -5,7 +5,7 @@ import ApiResponse from "../../common/utils/ApiResponse.js";
 import ApiError from "../../common/utils/ApiError.js";
 
 // services
-import { createPollService, createQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService } from "./services.js";
+import { createPollService, createQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService, getAllPollsService, getPollByIdService } from "./services.js";
 
 // zod validator schema
 import { createPollSchema, createQuestionSchema, updatePollSchema, updateQuestionOrderSchema, updateQuestionSchema, updateSingleOptionSchema } from "./validator.js";
@@ -208,4 +208,35 @@ const updatePoll = async (req: Request, res: Response) => {
     }
 }
 
-export { createPoll, createQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder };
+const getAllPolls = async (req: Request, res: Response) => {
+    try {
+        const polls = await getAllPollsService(req.user!._id);
+        return res.status(200).json(ApiResponse.success("Polls fetched successfully", polls));
+    } catch (error) {
+        if (error instanceof ApiError) {
+            return res.status(error.statusCode).json(ApiResponse.error(error.message));
+        }
+        console.error("Get all polls error:", error);
+        return res.status(500).json(ApiResponse.error("Internal server error"));
+    }
+}
+
+const getPollById = async (req: Request, res: Response) => {
+    const { pollId } = req.params;
+    if (!pollId || Array.isArray(pollId)) {
+        return res.status(400).json(ApiResponse.error("Poll id is required"));
+    }
+
+    try {
+        const pollData = await getPollByIdService(pollId, req.user!._id);
+        return res.status(200).json(ApiResponse.success("Poll fetched successfully", pollData));
+    } catch (error) {
+        if (error instanceof ApiError) {
+            return res.status(error.statusCode).json(ApiResponse.error(error.message));
+        }
+        console.error("Get poll by id error:", error);
+        return res.status(500).json(ApiResponse.error("Internal server error"));
+    }
+}
+
+export { createPoll, createQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById };

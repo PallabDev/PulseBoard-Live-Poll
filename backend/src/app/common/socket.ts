@@ -3,13 +3,85 @@ import { Server } from 'socket.io';
 import type { Socket } from 'socket.io';
 import { submitVoteSocketSchema } from '../module/public/validator.js';
 import { submitSocketVoteService } from '../module/vote/services.js';
-import { verifyAccessToken } from './utils/tokens.js';
+import { verifyAccessToken, verifyRefreshToken } from './utils/tokens.js';
 import User from '../module/auth/model.js';
 
 let io: Server | null = null;
 
 const pollRoom = (shareCode: string) => `poll:${shareCode}`;
 const analyticsRoom = (analyticsCode: string) => `analytics:${analyticsCode}`;
+
+const parseCookieHeader = (cookieHeader?: string) => {
+    if (!cookieHeader) {
+        return {};
+    }
+
+    return cookieHeader.split(';').reduce<Record<string, string>>((acc, cookie) => {
+        const separatorIndex = cookie.indexOf('=');
+        if (separatorIndex === -1) {
+            return acc;
+        }
+
+        const name = cookie.slice(0, separatorIndex).trim();
+        const value = cookie.slice(separatorIndex + 1).trim();
+
+        if (name) {
+            acc[name] = decodeURIComponent(value);
+        }
+
+        return acc;
+    }, {});
+};
+
+const resolveSocketUserId = async (socket: Socket, payloadAccessToken?: string) => {
+    const cookies = parseCookieHeader(socket.request.headers.cookie);
+    const authHeader = socket.request.headers.authorization;
+    const headerAccessToken = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : undefined;
+    const handshakeAccessToken = typeof socket.handshake.auth?.accessToken === 'string'
+        ? socket.handshake.auth.accessToken
+        : undefined;
+
+    const accessTokens = [
+        payloadAccessToken,
+        handshakeAccessToken,
+        headerAccessToken,
+        cookies.accessToken,
+    ].filter(Boolean) as string[];
+
+    for (const token of accessTokens) {
+        try {
+            const decoded = verifyAccessToken(token) as { userId?: string };
+            if (!decoded?.userId) {
+                continue;
+            }
+
+            const user = await User.findById(decoded.userId).select('_id');
+            if (user) {
+                return user._id;
+            }
+        } catch {
+            // Try the next credential source; access tokens may expire while the socket stays open.
+        }
+    }
+
+    if (cookies.refreshToken) {
+        try {
+            const decoded = verifyRefreshToken(cookies.refreshToken) as { userId?: string };
+            if (!decoded?.userId) {
+                return undefined;
+            }
+
+            const user = await User.findById(decoded.userId).select('_id refreshToken');
+            if (user?.refreshToken === cookies.refreshToken) {
+                return user._id;
+            }
+        } catch {
+            return undefined;
+        }
+    }
+
+    return undefined;
+};
 
 export const initSocketServer = (server: HttpServer) => {
     io = new Server(server, {
@@ -55,24 +127,7 @@ export const initSocketServer = (server: HttpServer) => {
                     return;
                 }
 
-                let userId = undefined;
-
-                if (result.data.accessToken) {
-                    const decoded = verifyAccessToken(result.data.accessToken) as { userId?: string };
-                    const tokenUserId = decoded?.userId;
-
-                    if (!tokenUserId) {
-                        throw new Error('Invalid access token');
-                    }
-
-                    const user = await User.findById(tokenUserId).select('_id');
-
-                    if (!user) {
-                        throw new Error('User not found');
-                    }
-
-                    userId = user._id;
-                }
+                const userId = await resolveSocketUserId(socket, result.data.accessToken);
 
                 const response = await submitSocketVoteService({
                     pollId: result.data.pollId,

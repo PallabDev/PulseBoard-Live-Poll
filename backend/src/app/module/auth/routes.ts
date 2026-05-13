@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { signin, signup, userinfo, signout } from './controller.js';
+import { signin, signup, userinfo, signout, verifyEmail, forgotPassword, resetPassword, refreshTokenController } from './controller.js';
 import verifyUser from './middleware.js';
 
 const router = Router();
@@ -10,11 +10,9 @@ router.post('/signin', signin);
 router.get('/signout', verifyUser, signout);
 router.get('/me', verifyUser, userinfo);
 
-/*
-    remaining stuff
-    1. verify email token
-    2. verify password reset token
-    3. reset password
-*/
+router.post('/verify-email', verifyEmail);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+router.post('/refresh-token', refreshTokenController);
 
 export default router;

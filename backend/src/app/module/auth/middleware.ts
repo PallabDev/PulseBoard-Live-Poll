@@ -14,7 +14,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
         } else if (req.cookies.accessToken) {
             accessToken = req.cookies.accessToken;
         }
-        else if (req.body.accessToken) {
+        else if (req.body?.accessToken) {
             accessToken = req.body.accessToken;
         }
 
@@ -37,8 +37,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
         if (error instanceof ApiError) {
             return res.status(error.statusCode).json(ApiResponse.error(error.message));
         }
-        console.error("Verify user error:", error);
-        return res.status(500).json(ApiResponse.error("Internal server error"));
+        return res.status(401).json(ApiResponse.error("Invalid or expired access token"));
     }
 };
 

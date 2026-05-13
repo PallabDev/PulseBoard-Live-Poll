@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import ApiError from '../../common/utils/ApiError.js';
 import { Poll, Question } from '../poll/model.js';
+import Vote from '../vote/model.js';
 
 const normalizeQuestion = (question: any) => ({
     id: String(question._id),
@@ -18,6 +19,29 @@ const normalizeQuestion = (question: any) => ({
             }))
         : [],
 });
+
+export const getPollVoteStats = async (pollId: mongoose.Types.ObjectId) => {
+    const votes = await Vote.collection.find({ pollId }, {
+        projection: {
+            userId: 1,
+            userFingerPrint: 1,
+        },
+    }).toArray();
+    const participantKeys = new Set<string>();
+
+    for (const vote of votes) {
+        if (vote.userId) {
+            participantKeys.add(`user:${String(vote.userId)}`);
+        } else if (vote.userFingerPrint) {
+            participantKeys.add(`anonymous:${vote.userFingerPrint}`);
+        }
+    }
+
+    return {
+        totalVotes: votes.length,
+        totalParticipants: participantKeys.size,
+    };
+};
 
 export const getPublicPollSnapshotByShareCode = async (shareCode: string) => {
     const poll = await Poll.findOne({ shareCode }).lean();
@@ -66,6 +90,7 @@ export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) =>
     const questions = await Question.find({ pollId: poll._id })
         .sort({ questionNumber: 1 })
         .lean();
+    const voteStats = await getPollVoteStats(poll._id);
 
     return {
         poll: {
@@ -79,8 +104,8 @@ export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) =>
             analyticsCode: poll.analyticsCode,
             shareCode: poll.shareCode,
             status: poll.status,
-            totalVotes: poll.totalVotes,
-            totalParticipants: poll.totalParticipants,
+            totalVotes: voteStats.totalVotes,
+            totalParticipants: voteStats.totalParticipants,
         },
         questions: questions.map((question) => normalizeQuestion(question)),
     };
