@@ -38,11 +38,11 @@ export const SignIn: React.FC = () => {
         <div className="flex min-h-screen bg-zinc-950 selection:bg-zinc-800">
             {/* Left Branding Panel */}
             <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900"></div>
+                <div className="absolute inset-0 bg-linear-to-br from-zinc-900 via-zinc-950 to-zinc-900"></div>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(120,119,198,0.08),transparent_60%)]"></div>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(34,197,94,0.06),transparent_50%)]"></div>
-                
-                <div className="relative z-10 max-w-md px-12 space-y-8">
+
+                <div className="relative z-10 max-w-md px-2 space-y-8">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700">
                             <BarChart3 className="h-5 w-5 text-zinc-50" />
@@ -54,7 +54,7 @@ export const SignIn: React.FC = () => {
                         <span className="text-zinc-400">Get instant feedback.</span>
                     </h2>
                     <p className="text-zinc-500 leading-relaxed">
-                        Engage your audience with real-time anonymous polling. 
+                        Engage your audience with real-time anonymous polling.
                         Create, share, and analyze results - all in one beautiful dashboard.
                     </p>
                     <div className="flex items-center gap-6 pt-4">
@@ -94,7 +94,7 @@ export const SignIn: React.FC = () => {
 
                     <Card className="border-zinc-800 bg-zinc-900/30 backdrop-blur-xl shadow-2xl">
                         <form onSubmit={handleSubmit}>
-                            <CardContent className="grid gap-5 pt-6">
+                            <CardContent className="grid gap-5 py-6">
                                 {error && (
                                     <div className="rounded-lg bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20 flex items-center gap-2">
                                         <div className="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></div>
@@ -109,11 +109,11 @@ export const SignIn: React.FC = () => {
                                 )}
                                 <div className="grid gap-2">
                                     <Label htmlFor="email" className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Email</Label>
-                                    <Input 
-                                        id="email" 
-                                        type="email" 
-                                        placeholder="you@example.com" 
-                                        required 
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="you@example.com"
+                                        required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="bg-zinc-950/60 border-zinc-800 text-zinc-50 focus-visible:ring-zinc-700 h-11"
@@ -126,11 +126,11 @@ export const SignIn: React.FC = () => {
                                             Forgot password?
                                         </Link>
                                     </div>
-                                    <Input 
-                                        id="password" 
-                                        type="password" 
+                                    <Input
+                                        id="password"
+                                        type="password"
                                         placeholder="Password"
-                                        required 
+                                        required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="bg-zinc-950/60 border-zinc-800 text-zinc-50 focus-visible:ring-zinc-700 h-11"
@@ -138,9 +138,9 @@ export const SignIn: React.FC = () => {
                                 </div>
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4 pb-6">
-                                <Button 
-                                    className="w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-11 font-medium" 
-                                    type="submit" 
+                                <Button
+                                    className="w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-11 font-medium"
+                                    type="submit"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

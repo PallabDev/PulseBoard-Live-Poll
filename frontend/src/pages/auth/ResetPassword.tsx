@@ -96,7 +96,7 @@ export const ResetPassword: React.FC = () => {
 
                 <Card className="border-zinc-800 bg-zinc-900/30 backdrop-blur-xl shadow-2xl">
                     <form onSubmit={handleSubmit}>
-                        <CardContent className="grid gap-5 pt-6">
+                        <CardContent className="grid gap-5 py-6">
                             {error && (
                                 <div className="rounded-lg bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20 flex items-center gap-2">
                                     <div className="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></div>
