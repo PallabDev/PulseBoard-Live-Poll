@@ -79,152 +79,190 @@ const Navbar = () => {
 };
 
 const Hero = () => {
+    const [isVideoOpen, setIsVideoOpen] = useState(false);
+
     return (
-        <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-            {/* Background Gradients - Poppy Theme */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rose-500/15 rounded-full blur-[120px] opacity-60 mix-blend-screen pointer-events-none"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/15 rounded-full blur-[100px] opacity-50 mix-blend-screen pointer-events-none translate-x-[20%] translate-y-[20%]"></div>
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <>
+            <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+                {/* Background Gradients - Poppy Theme */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rose-500/15 rounded-full blur-[120px] opacity-60 mix-blend-screen pointer-events-none"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/15 rounded-full blur-[100px] opacity-50 mix-blend-screen pointer-events-none translate-x-[20%] translate-y-[20%]"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="text-center max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-sm"
-                    >
-                        <Sparkles className="w-4 h-4 text-rose-400" />
-                        <span className="text-sm font-medium text-zinc-300">The modern way to engage your audience</span>
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 mb-6"
-                    >
-                        Live polls that keep <br className="hidden md:block" /> every room engaged.
-                    </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed"
-                    >
-                        Create interactive polls, collect responses in real time, track live analytics, and publish results when you're ready. Built for classrooms, events, teams, and communities.
-                    </motion.p>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-4"
-                    >
-                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
-                            <Link to="/dashboard" className="w-full px-8 py-4 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-lg transition-colors shadow-[0_0_30px_rgba(244,63,94,0.3)] flex items-center justify-center gap-2">
-                                Create your first poll
-                                <ArrowRight className="w-5 h-5" />
-                            </Link>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center max-w-4xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-sm"
+                        >
+                            <Sparkles className="w-4 h-4 text-rose-400" />
+                            <span className="text-sm font-medium text-zinc-300">The modern way to engage your audience</span>
                         </motion.div>
-                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
-                            <a href="#how-it-works" className="w-full px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-medium rounded-lg border border-white/10 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
-                                <Play className="w-5 h-5 text-zinc-400" />
-                                View live demo
-                            </a>
+
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+                            className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 mb-6"
+                        >
+                            Live polls that keep <br className="hidden md:block" /> every room engaged.
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
+                            className="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed"
+                        >
+                            Create interactive polls, collect responses in real time, track live analytics, and publish results when you're ready. Built for classrooms, events, teams, and communities.
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
+                            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                        >
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
+                                <Link to="/dashboard" className="w-full px-8 py-4 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-lg transition-colors shadow-[0_0_30px_rgba(244,63,94,0.3)] flex items-center justify-center gap-2">
+                                    Create your first poll
+                                    <ArrowRight className="w-5 h-5" />
+                                </Link>
+                            </motion.div>
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
+                                <button onClick={() => setIsVideoOpen(true)} className="w-full px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-medium rounded-lg border border-white/10 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
+                                    <Play className="w-5 h-5 text-zinc-400" />
+                                    View live demo
+                                </button>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
 
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }}
+                            className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-zinc-500 font-medium"
+                        >
+                            <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-rose-400" /> Real-time analytics</div>
+                            <div className="flex items-center gap-2"><Lock className="w-4 h-4 text-orange-400" /> Anonymous or login-based voting</div>
+                            <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-cyan-400" /> Publish results anytime</div>
+                            <div className="flex items-center gap-2"><Globe className="w-4 h-4 text-amber-400" /> Mobile friendly</div>
+                        </motion.div>
+                    </div>
+
+                    {/* Dashboard Mockup */}
                     <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }}
-                        className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-zinc-500 font-medium"
+                        initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}
+                        className="mt-20 relative mx-auto max-w-5xl group"
                     >
-                        <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-rose-400" /> Real-time analytics</div>
-                        <div className="flex items-center gap-2"><Lock className="w-4 h-4 text-orange-400" /> Anonymous or login-based voting</div>
-                        <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-cyan-400" /> Publish results anytime</div>
-                        <div className="flex items-center gap-2"><Globe className="w-4 h-4 text-amber-400" /> Mobile friendly</div>
-                    </motion.div>
-                </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent z-10 top-1/2"></div>
+                        {/* Subtle glow behind mockup on hover */}
+                        <div className="absolute -inset-1 bg-gradient-to-r from-rose-500/20 to-orange-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
 
-                {/* Dashboard Mockup */}
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}
-                    className="mt-20 relative mx-auto max-w-5xl group"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent z-10 top-1/2"></div>
-                    {/* Subtle glow behind mockup on hover */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-rose-500/20 to-orange-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
-
-                    <div className="relative rounded-xl border border-white/10 bg-zinc-900/80 backdrop-blur-xl shadow-2xl overflow-hidden transition-transform duration-500">
-                        {/* Browser Header */}
-                        <div className="flex items-center px-4 py-3 border-b border-white/5 bg-zinc-950/80">
-                            <div className="flex gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                                <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        <div className="relative rounded-xl border border-white/10 bg-zinc-900/80 backdrop-blur-xl shadow-2xl overflow-hidden transition-transform duration-500">
+                            {/* Browser Header */}
+                            <div className="flex items-center px-4 py-3 border-b border-white/5 bg-zinc-950/80">
+                                <div className="flex gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                                    <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                                </div>
+                                <div className="mx-auto bg-white/5 px-4 py-1 rounded-md text-xs text-zinc-500 flex items-center gap-2 border border-white/5">
+                                    <Lock className="w-3 h-3" /> app.pulseboard.com/analytics/xyz123
+                                </div>
                             </div>
-                            <div className="mx-auto bg-white/5 px-4 py-1 rounded-md text-xs text-zinc-500 flex items-center gap-2 border border-white/5">
-                                <Lock className="w-3 h-3" /> app.pulseboard.com/analytics/xyz123
-                            </div>
-                        </div>
-                        {/* Mockup Content */}
-                        <div className="p-6 md:p-8 bg-zinc-950/50">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                                <div>
-                                    <h3 className="text-xl font-bold text-white mb-1">College Student Quick Opinion Poll</h3>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="flex items-center gap-1.5 text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-full"><span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span> Live</span>
-                                        <span className="text-zinc-500">•</span>
-                                        <span className="text-zinc-400">Created today</span>
+                            {/* Mockup Content */}
+                            <div className="p-6 md:p-8 bg-zinc-950/50">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white mb-1">College Student Quick Opinion Poll</h3>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <span className="flex items-center gap-1.5 text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-full"><span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span> Live</span>
+                                            <span className="text-zinc-500">•</span>
+                                            <span className="text-zinc-400">Created today</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button className="px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-md text-sm font-medium text-white flex items-center gap-2">
+                                            <Users className="w-4 h-4" /> User Summary
+                                        </button>
+                                        <button className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-md text-sm font-medium text-rose-400 flex items-center gap-2 transition-colors">
+                                            <Eye className="w-4 h-4" /> Publish Results
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="flex gap-3">
-                                    <button className="px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-md text-sm font-medium text-white flex items-center gap-2">
-                                        <Users className="w-4 h-4" /> User Summary
-                                    </button>
-                                    <button className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-md text-sm font-medium text-rose-400 flex items-center gap-2 transition-colors">
-                                        <Eye className="w-4 h-4" /> Publish Results
-                                    </button>
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                                <div className="bg-zinc-900 border border-white/5 p-4 rounded-lg flex items-center gap-4 hover:border-white/10 transition-colors">
-                                    <div className="p-3 bg-cyan-500/10 rounded-md text-cyan-400"><BarChart3 className="w-6 h-6" /></div>
-                                    <div><p className="text-xs text-zinc-500 font-medium">Total Votes</p><p className="text-2xl font-bold text-white">1,248</p></div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                    <div className="bg-zinc-900 border border-white/5 p-4 rounded-lg flex items-center gap-4 hover:border-white/10 transition-colors">
+                                        <div className="p-3 bg-cyan-500/10 rounded-md text-cyan-400"><BarChart3 className="w-6 h-6" /></div>
+                                        <div><p className="text-xs text-zinc-500 font-medium">Total Votes</p><p className="text-2xl font-bold text-white">1,248</p></div>
+                                    </div>
+                                    <div className="bg-zinc-900 border border-white/5 p-4 rounded-lg flex items-center gap-4 hover:border-white/10 transition-colors">
+                                        <div className="p-3 bg-orange-500/10 rounded-md text-orange-400"><Users2 className="w-6 h-6" /></div>
+                                        <div><p className="text-xs text-zinc-500 font-medium">Participants</p><p className="text-2xl font-bold text-white">412</p></div>
+                                    </div>
+                                    <div className="bg-zinc-900 border border-white/5 p-4 rounded-lg flex items-center gap-4 hover:border-white/10 transition-colors">
+                                        <div className="p-3 bg-rose-500/10 rounded-md text-rose-400"><Lock className="w-6 h-6" /></div>
+                                        <div><p className="text-xs text-zinc-500 font-medium">Access</p><p className="text-2xl font-bold text-white">Login Required</p></div>
+                                    </div>
                                 </div>
-                                <div className="bg-zinc-900 border border-white/5 p-4 rounded-lg flex items-center gap-4 hover:border-white/10 transition-colors">
-                                    <div className="p-3 bg-orange-500/10 rounded-md text-orange-400"><Users2 className="w-6 h-6" /></div>
-                                    <div><p className="text-xs text-zinc-500 font-medium">Participants</p><p className="text-2xl font-bold text-white">412</p></div>
-                                </div>
-                                <div className="bg-zinc-900 border border-white/5 p-4 rounded-lg flex items-center gap-4 hover:border-white/10 transition-colors">
-                                    <div className="p-3 bg-rose-500/10 rounded-md text-rose-400"><Lock className="w-6 h-6" /></div>
-                                    <div><p className="text-xs text-zinc-500 font-medium">Access</p><p className="text-2xl font-bold text-white">Login Required</p></div>
-                                </div>
-                            </div>
 
-                            <div className="bg-zinc-900 border border-white/5 p-6 rounded-lg">
-                                <h4 className="text-white font-medium mb-6">1. What is your preferred study method?</h4>
-                                <div className="space-y-4">
-                                    {[
-                                        { label: "Group Study", percent: 45, color: "bg-rose-500", votes: 561 },
-                                        { label: "Self Study", percent: 30, color: "bg-orange-500", votes: 374 },
-                                        { label: "Video Lectures", percent: 15, color: "bg-cyan-500", votes: 187 },
-                                        { label: "Practical Labs", percent: 10, color: "bg-amber-500", votes: 126 },
-                                    ].map((opt, i) => (
-                                        <div key={i} className="group/bar cursor-pointer">
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="text-zinc-300 group-hover/bar:text-white transition-colors">{opt.label}</span>
-                                                <span className="text-zinc-400">{opt.percent}% ({opt.votes})</span>
+                                <div className="bg-zinc-900 border border-white/5 p-6 rounded-lg">
+                                    <h4 className="text-white font-medium mb-6">1. What is your preferred study method?</h4>
+                                    <div className="space-y-4">
+                                        {[
+                                            { label: "Group Study", percent: 45, color: "bg-rose-500", votes: 561 },
+                                            { label: "Self Study", percent: 30, color: "bg-orange-500", votes: 374 },
+                                            { label: "Video Lectures", percent: 15, color: "bg-cyan-500", votes: 187 },
+                                            { label: "Practical Labs", percent: 10, color: "bg-amber-500", votes: 126 },
+                                        ].map((opt, i) => (
+                                            <div key={i} className="group/bar cursor-pointer">
+                                                <div className="flex justify-between text-sm mb-1">
+                                                    <span className="text-zinc-300 group-hover/bar:text-white transition-colors">{opt.label}</span>
+                                                    <span className="text-zinc-400">{opt.percent}% ({opt.votes})</span>
+                                                </div>
+                                                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }} animate={{ width: `${opt.percent}%` }} transition={{ duration: 1, delay: 0.8 + i * 0.1 }}
+                                                        className={`h-full ${opt.color} rounded-full`}
+                                                    ></motion.div>
+                                                </div>
                                             </div>
-                                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }} animate={{ width: `${opt.percent}%` }} transition={{ duration: 1, delay: 0.8 + i * 0.1 }}
-                                                    className={`h-full ${opt.color} rounded-full`}
-                                                ></motion.div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Video Modal */}
+            <AnimatePresence>
+                {isVideoOpen && (
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center px-4" style={{ zIndex: 99999 }}>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsVideoOpen(false)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm cursor-pointer"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-5xl aspect-video bg-zinc-950 rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                        >
+                            <button
+                                onClick={() => setIsVideoOpen(false)}
+                                className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors backdrop-blur-md"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                            <video
+                                src="https://res.cloudinary.com/dfwgiivke/video/upload/v1778765846/Pulseboard-Export_so0dqk.mp4"
+                                autoPlay
+                                controls
+                                className="w-full h-full object-cover relative z-40"
+                            />
+                        </motion.div>
                     </div>
-                </motion.div>
-            </div>
-        </section>
+                )}
+            </AnimatePresence>
+        </>
     );
 };
 
@@ -715,9 +753,8 @@ const Footer = () => {
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} PulseBoard. All rights reserved.</p>
                     <div className="flex items-center gap-6">
-                        <a href="#" className="text-zinc-600 hover:text-white transition-colors">Twitter</a>
-                        <a href="#" className="text-zinc-600 hover:text-white transition-colors">GitHub</a>
-                        <a href="#" className="text-zinc-600 hover:text-white transition-colors">Discord</a>
+                        <a href="https://x.com/Pallab_dev" className="text-zinc-600 hover:text-white transition-colors">Twitter</a>
+                        <a href="https://github.com/PallabDev/PulseBoard-Live-Poll" className="text-zinc-600 hover:text-white transition-colors">GitHub</a>
                     </div>
                 </div>
             </div>
