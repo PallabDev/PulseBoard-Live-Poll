@@ -9,6 +9,10 @@ export const pollService = {
         const response = await api.patch(`/poll/${pollId}`, data);
         return response.data;
     },
+    async deletePoll(pollId: string) {
+        const response = await api.delete(`/poll/${pollId}`);
+        return response.data;
+    },
     async getAllPolls() {
         const response = await api.get('/poll/mypoll');
         return response.data;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePolls } from '../../hooks/useLocalPolls';
 import { pollService } from '../../services/poll.service';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { RichTextEditor } from '../../components/shared/RichTextEditor';
 import { Loader2, ArrowLeft, Save, Plus, GripVertical, Trash2, Edit2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -37,10 +37,13 @@ export const PollBuilder: React.FC = () => {
     const { pollId } = useParams();
     const isEditing = !!pollId;
     const navigate = useNavigate();
-    const { addPoll, updatePollLocal } = usePolls();
+    const { addPoll, updatePollLocal, deletePollLocal } = usePolls();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeletingPoll, setIsDeletingPoll] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const saveInFlightRef = useRef(false);
 
     const [pollName, setPollName] = useState('');
     const [pollDescription, setPollDescription] = useState('');
@@ -105,11 +108,16 @@ export const PollBuilder: React.FC = () => {
     }, [isEditing, pollId, navigate]);
 
     const handleSave = async () => {
+        if (saveInFlightRef.current) {
+            return;
+        }
+
         if (!pollName.trim()) {
             toast.error("Poll name is required");
             return;
         }
 
+        saveInFlightRef.current = true;
         setIsSaving(true);
         try {
             let currentPollId = pollId;
@@ -189,13 +197,33 @@ export const PollBuilder: React.FC = () => {
                         });
                     }
                     toast.success("Poll created successfully");
+                    navigate(`/dashboard/edit/${currentPollId}`, { replace: true });
                 }
             }
         } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to save poll");
         } finally {
+            saveInFlightRef.current = false;
             setIsSaving(false);
+        }
+    };
+
+    const handleDeletePoll = async () => {
+        if (!pollId) return;
+
+        setIsDeletingPoll(true);
+        try {
+            await pollService.deletePoll(pollId);
+            deletePollLocal(pollId);
+            toast.success("Poll deleted successfully");
+            navigate('/dashboard');
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to delete poll");
+        } finally {
+            setIsDeletingPoll(false);
+            setIsDeleteDialogOpen(false);
         }
     };
 
@@ -305,16 +333,28 @@ export const PollBuilder: React.FC = () => {
                     </h1>
                 </div>
                 <div className="ml-auto flex items-center gap-3">
+                    {isEditing && (
+                        <Button
+                            variant="outline"
+                            className="border-red-950/60 text-red-400 hover:bg-red-950/40 hover:text-red-300"
+                            onClick={() => setIsDeleteDialogOpen(true)}
+                            disabled={isSaving || isDeletingPoll}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Poll
+                        </Button>
+                    )}
                     <Button
                         variant="outline"
                         className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
                         onClick={() => setStatus(status === 'draft' ? 'active' : 'draft')}
+                        disabled={isDeletingPoll}
                     >
                         Status: {status}
                     </Button>
                     <Button
                         onClick={handleSave}
-                        disabled={isSaving}
+                        disabled={isSaving || isDeletingPoll}
                         className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
                     >
                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -511,6 +551,35 @@ export const PollBuilder: React.FC = () => {
                             className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
                         >
                             Done Editing
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => !isDeletingPoll && setIsDeleteDialogOpen(open)}>
+                <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-50">
+                    <DialogHeader>
+                        <DialogTitle>Delete poll?</DialogTitle>
+                        <DialogDescription className="text-zinc-400">
+                            This will permanently delete "{pollName}" with all questions, options, votes, share links, and analytics data.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="border-zinc-800 bg-zinc-900/20">
+                        <Button
+                            variant="outline"
+                            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+                            onClick={() => setIsDeleteDialogOpen(false)}
+                            disabled={isDeletingPoll}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            className="bg-red-600 text-white hover:bg-red-500"
+                            onClick={handleDeletePoll}
+                            disabled={isDeletingPoll}
+                        >
+                            {isDeletingPoll ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                            Delete Poll
                         </Button>
                     </DialogFooter>
                 </DialogContent>

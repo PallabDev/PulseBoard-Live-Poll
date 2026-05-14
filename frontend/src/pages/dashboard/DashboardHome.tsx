@@ -1,18 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePolls } from '../../hooks/useLocalPolls';
+import { pollService } from '../../services/poll.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Edit2, Link2, Plus, Clock, Users, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { BarChart3, Edit2, Link2, Plus, Clock, Users, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const DashboardHome: React.FC = () => {
-    const { polls, isLoading } = usePolls();
+    const { polls, isLoading, deletePollLocal } = usePolls();
     const navigate = useNavigate();
+    const [pollToDelete, setPollToDelete] = useState<{ id: string; name: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const copyToClipboard = (text: string, type: string) => {
         navigator.clipboard.writeText(text);
         toast.success(`${type} copied to clipboard`);
+    };
+
+    const handleDeletePoll = async () => {
+        if (!pollToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            await pollService.deletePoll(pollToDelete.id);
+            deletePollLocal(pollToDelete.id);
+            toast.success("Poll deleted successfully");
+            setPollToDelete(null);
+        } catch (error: any) {
+            console.error("Failed to delete poll:", error);
+            toast.error(error.response?.data?.message || "Failed to delete poll");
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     if (isLoading) {
@@ -38,6 +59,7 @@ export const DashboardHome: React.FC = () => {
     }
 
     return (
+        <>
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
@@ -99,6 +121,14 @@ export const DashboardHome: React.FC = () => {
                                     <Button variant="outline" size="sm" className="h-8 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50" onClick={() => navigate(`/dashboard/edit/${pollId}`)}>
                                         <Edit2 className="h-3 w-3 mr-1" /> Edit
                                     </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 border-red-950/60 text-red-400 hover:bg-red-950/40 hover:text-red-300"
+                                        onClick={() => setPollToDelete({ id: pollId, name: poll.pollName })}
+                                    >
+                                        <Trash2 className="h-3 w-3 mr-1" /> Delete
+                                    </Button>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => copyToClipboard(shareUrl, 'Share Link')} title="Copy Share Link">
@@ -114,5 +144,34 @@ export const DashboardHome: React.FC = () => {
                 })}
             </div>
         </div>
+        <Dialog open={!!pollToDelete} onOpenChange={(open) => !open && !isDeleting && setPollToDelete(null)}>
+            <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-50">
+                <DialogHeader>
+                    <DialogTitle>Delete poll?</DialogTitle>
+                    <DialogDescription className="text-zinc-400">
+                        This will permanently delete "{pollToDelete?.name}" with all questions, options, votes, share links, and analytics data.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="border-zinc-800 bg-zinc-900/20">
+                    <Button
+                        variant="outline"
+                        className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+                        onClick={() => setPollToDelete(null)}
+                        disabled={isDeleting}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        className="bg-red-600 text-white hover:bg-red-500"
+                        onClick={handleDeletePoll}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                        Delete Poll
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </>
     );
 };

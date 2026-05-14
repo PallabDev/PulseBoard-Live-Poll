@@ -1,11 +1,12 @@
 import { Router } from "express";
 import verifyUser from "../auth/middleware.js";
-import { createPoll, createQuestion, deleteQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById } from "./controller.js";
+import { createPoll, createQuestion, deletePoll, deleteQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById } from "./controller.js";
 
 const router = Router();
 
 router.post("/", verifyUser, createPoll);
 router.patch("/:pollId", verifyUser, updatePoll);
+router.delete("/:pollId", verifyUser, deletePoll);
 
 // GET routes
 router.get("/mypoll", verifyUser, getAllPolls);

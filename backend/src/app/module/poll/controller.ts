@@ -5,7 +5,7 @@ import ApiResponse from "../../common/utils/ApiResponse.js";
 import ApiError from "../../common/utils/ApiError.js";
 
 // services
-import { createPollService, createQuestionService, deleteQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService, getAllPollsService, getPollByIdService } from "./services.js";
+import { createPollService, createQuestionService, deletePollService, deleteQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService, getAllPollsService, getPollByIdService } from "./services.js";
 
 // zod validator schema
 import { createPollSchema, createQuestionSchema, updatePollSchema, updateQuestionOrderSchema, updateQuestionSchema, updateSingleOptionSchema } from "./validator.js";
@@ -235,6 +235,27 @@ const updatePoll = async (req: Request, res: Response) => {
     }
 }
 
+const deletePoll = async (req: Request, res: Response) => {
+    const { pollId } = req.params;
+    if (!pollId || Array.isArray(pollId)) {
+        return res.status(400).json(ApiResponse.error("Poll id is required"));
+    }
+
+    try {
+        const poll = await deletePollService({
+            pollId,
+            userId: req.user!._id,
+        });
+        return res.status(200).json(ApiResponse.success("Poll deleted successfully", poll));
+    } catch (error) {
+        if (error instanceof ApiError) {
+            return res.status(error.statusCode).json(ApiResponse.error(error.message));
+        }
+        console.error("Delete poll error:", error);
+        return res.status(500).json(ApiResponse.error("Internal server error"));
+    }
+}
+
 const getAllPolls = async (req: Request, res: Response) => {
     try {
         const polls = await getAllPollsService(req.user!._id);
@@ -266,4 +287,4 @@ const getPollById = async (req: Request, res: Response) => {
     }
 }
 
-export { createPoll, createQuestion, deleteQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById };
+export { createPoll, createQuestion, deletePoll, deleteQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById };

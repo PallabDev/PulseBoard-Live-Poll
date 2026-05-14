@@ -274,6 +274,25 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
     return updatedPoll;
 }
 
+type DeletePollServiceInput = {
+    pollId: string;
+    userId: mongoose.Types.ObjectId;
+};
+
+export const deletePollService = async ({ pollId, userId }: DeletePollServiceInput) => {
+    const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
+
+    if (!poll) {
+        throw new ApiError(404, "Poll not found");
+    }
+
+    await Vote.deleteMany({ pollId: poll._id });
+    await Question.deleteMany({ pollId: poll._id });
+    await poll.deleteOne();
+
+    return poll;
+}
+
 export const getAllPollsService = async (userId: mongoose.Types.ObjectId) => {
     const polls = await Poll.find({ createdBy: userId }).sort({ createdAt: -1 });
     return polls;
