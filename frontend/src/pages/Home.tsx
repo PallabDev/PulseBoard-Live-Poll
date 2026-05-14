@@ -160,7 +160,7 @@ const Hero = () => {
                                     <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
                                 </div>
                                 <div className="mx-auto bg-white/5 px-4 py-1 rounded-md text-xs text-zinc-500 flex items-center gap-2 border border-white/5">
-                                    <Lock className="w-3 h-3" /> app.pulseboard.com/analytics/xyz123
+                                    <Lock className="w-3 h-3" /> pulseboard.pallabdev.in
                                 </div>
                             </div>
                             {/* Mockup Content */}
