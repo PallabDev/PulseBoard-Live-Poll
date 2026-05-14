@@ -6,6 +6,8 @@ import ApiError from "../../common/utils/ApiError.js";
 
 // services
 import { createPollService, createQuestionService, deletePollService, deleteQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService, getAllPollsService, getPollByIdService } from "./services.js";
+import { getPublicAnalyticsSnapshotByCode, getPublicPollSnapshotByShareCode } from "../public/services.js";
+import { emitPublicAnalyticsUpdate, emitPublicPollUpdate } from "../../common/socket.js";
 
 // zod validator schema
 import { createPollSchema, createQuestionSchema, updatePollSchema, updateQuestionOrderSchema, updateQuestionSchema, updateSingleOptionSchema } from "./validator.js";
@@ -225,6 +227,14 @@ const updatePoll = async (req: Request, res: Response) => {
             userId: req.user!._id,
             ...result.data,
         });
+
+        const [pollSnapshot, analyticsSnapshot] = await Promise.all([
+            getPublicPollSnapshotByShareCode(poll.shareCode),
+            getPublicAnalyticsSnapshotByCode(poll.analyticsCode),
+        ]);
+        emitPublicPollUpdate(poll.shareCode, pollSnapshot);
+        emitPublicAnalyticsUpdate(poll.analyticsCode, analyticsSnapshot);
+
         return res.status(200).json(ApiResponse.success("Poll updated successfully", poll));
     } catch (error) {
         if (error instanceof ApiError) {

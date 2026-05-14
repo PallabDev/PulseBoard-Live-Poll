@@ -89,6 +89,7 @@ export const updatePollSchema = z.object({
         message: "Poll duration can not be more than 30 minutes",
     }).optional(),
     isAnonymousAllowed: z.boolean().optional(),
+    isResultPublished: z.boolean().optional(),
     status: z.enum(["draft", "active"]).optional(),
 }).refine(
     (data) => Object.keys(data).length > 0,

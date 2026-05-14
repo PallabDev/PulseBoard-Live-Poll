@@ -9,6 +9,7 @@ import { DashboardHome } from './pages/dashboard/DashboardHome';
 import { PollBuilder } from './pages/builder/PollBuilder';
 import { PublicPoll } from './pages/public/PublicPoll';
 import { LiveAnalytics } from './pages/analytics/LiveAnalytics';
+import { ParticipantSummary } from './pages/analytics/ParticipantSummary';
 import { VerifyEmail } from './pages/auth/VerifyEmail';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
@@ -27,6 +28,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/join/:shareCode" element={<PublicPoll />} />
           <Route path="/analytics/:analyticsCode" element={<LiveAnalytics />} />
+          <Route path="/analytics/:analyticsCode/summary" element={<ParticipantSummary />} />
 
           {/* Protected Dashboard Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

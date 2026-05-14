@@ -2,21 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { pollService } from '../../services/poll.service';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { Loader2, ArrowLeft, Users, MousePointerClick, ShieldCheck, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Users, MousePointerClick, ShieldCheck, Clock, Send, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 
 const BACKEND_URL = 'http://localhost:3000';
 
 const CHART_COLORS = [
-    'hsl(142, 71%, 45%)', // emerald
-    'hsl(217, 91%, 60%)', // blue
-    'hsl(280, 67%, 55%)', // purple
-    'hsl(32, 95%, 55%)',  // amber
+    'hsl(162, 84%, 45%)',
+    'hsl(217, 91%, 60%)',
+    'hsl(280, 78%, 62%)',
+    'hsl(32, 95%, 55%)',
+    'hsl(346, 87%, 59%)',
+    'hsl(190, 95%, 45%)',
 ];
 
 interface AnalyticsSnapshot {
@@ -79,11 +82,13 @@ const CountdownTimer: React.FC<{ endTime: string | null }> = ({ endTime }) => {
 export const LiveAnalytics: React.FC = () => {
     const { analyticsCode } = useParams();
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     
     const [isLoading, setIsLoading] = useState(true);
     const [snapshot, setSnapshot] = useState<AnalyticsSnapshot | null>(null);
     const [, setSocket] = useState<Socket | null>(null);
     const [socketReady, setSocketReady] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
 
     useEffect(() => {
         const loadAnalytics = async () => {
@@ -152,6 +157,26 @@ export const LiveAnalytics: React.FC = () => {
     }
 
     const { poll, questions } = snapshot;
+    const pollId = poll._id || poll.id;
+
+    const handlePublishResults = async () => {
+        if (!pollId || poll.isResultPublished) return;
+
+        setIsPublishing(true);
+        try {
+            const res = await pollService.updatePoll(pollId, { isResultPublished: true });
+            if (res.success) {
+                setSnapshot((current) => current
+                    ? { ...current, poll: { ...current.poll, isResultPublished: true } }
+                    : current
+                );
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsPublishing(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-50 selection:bg-zinc-800 pb-20">
@@ -168,6 +193,26 @@ export const LiveAnalytics: React.FC = () => {
                     </div>
                     <div className="ml-auto flex items-center gap-3">
                         <CountdownTimer endTime={poll.pollEndTime} />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/analytics/${analyticsCode}/summary`)}
+                            className="hidden border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 sm:inline-flex"
+                        >
+                            <FileText className="mr-2 h-4 w-4" />
+                            User Summary
+                        </Button>
+                        {isAuthenticated && (
+                            <Button
+                                size="sm"
+                                onClick={handlePublishResults}
+                                disabled={isPublishing || poll.isResultPublished}
+                                className={poll.isResultPublished ? 'bg-emerald-500 text-zinc-950 hover:bg-emerald-400' : 'bg-zinc-50 text-zinc-950 hover:bg-zinc-200'}
+                            >
+                                {isPublishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                                {poll.isResultPublished ? 'Published' : 'Publish Results'}
+                            </Button>
+                        )}
                         <div className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${socketReady ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-amber-500/30 bg-amber-500/10 text-amber-400'}`}>
                             {socketReady ? <><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span> Live</> : 'Connecting...'}
                         </div>
@@ -179,7 +224,7 @@ export const LiveAnalytics: React.FC = () => {
                 
                 {/* Top Metrics Grid */}
                 <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="border-zinc-800 bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
+                    <Card className="overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/15 via-zinc-900/70 to-zinc-950 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between space-y-0 pb-2">
                                 <p className="text-sm font-medium text-zinc-400">Total Votes</p>
@@ -197,7 +242,7 @@ export const LiveAnalytics: React.FC = () => {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="border-zinc-800 bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
+                    <Card className="overflow-hidden border-sky-500/20 bg-gradient-to-br from-sky-500/15 via-zinc-900/70 to-zinc-950 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between space-y-0 pb-2">
                                 <p className="text-sm font-medium text-zinc-400">Participants</p>
@@ -215,7 +260,7 @@ export const LiveAnalytics: React.FC = () => {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="border-zinc-800 bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
+                    <Card className="overflow-hidden border-fuchsia-500/20 bg-gradient-to-br from-fuchsia-500/15 via-zinc-900/70 to-zinc-950 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between space-y-0 pb-2">
                                 <p className="text-sm font-medium text-zinc-400">Access Control</p>

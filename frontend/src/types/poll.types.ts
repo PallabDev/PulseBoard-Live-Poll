@@ -9,6 +9,7 @@ export interface IPoll {
     isAnonymousAllowed: boolean;
     shareCode: string;
     analyticsCode: string;
+    isResultPublished?: boolean;
     status: 'draft' | 'active' | 'ended';
     totalVotes: number;
     totalParticipants: number;

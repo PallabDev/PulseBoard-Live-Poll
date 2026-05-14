@@ -229,7 +229,7 @@ type UpdatePollServiceInput = IUpdatePoll & {
     userId: mongoose.Types.ObjectId;
 };
 
-export const updatePollService = async ({ pollId, userId, pollName, pollDescription, pollDurationInMinutes, isAnonymousAllowed, status }: UpdatePollServiceInput) => {
+export const updatePollService = async ({ pollId, userId, pollName, pollDescription, pollDurationInMinutes, isAnonymousAllowed, isResultPublished, status }: UpdatePollServiceInput) => {
     const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
 
     if (!poll) {
@@ -256,6 +256,10 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
 
     if (isAnonymousAllowed !== undefined) {
         poll.isAnonymousAllowed = isAnonymousAllowed;
+    }
+
+    if (isResultPublished !== undefined) {
+        poll.isResultPublished = isResultPublished;
     }
 
     if (status !== undefined) {

@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { getPublicAnalytics, getPublicPoll } from './controller.js';
+import { getParticipantSummary, getPublicAnalytics, getPublicPoll } from './controller.js';
 
 const router = Router();
 
 router.get('/polls/:shareCode', getPublicPoll);
 router.get('/analytics/:analyticsCode', getPublicAnalytics);
+router.get('/analytics/:analyticsCode/participants', getParticipantSummary);
 
 export default router;

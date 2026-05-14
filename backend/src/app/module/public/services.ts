@@ -53,6 +53,8 @@ export const getPublicPollSnapshotByShareCode = async (shareCode: string) => {
     const questions = await Question.find({ pollId: poll._id })
         .sort({ questionNumber: 1 })
         .lean();
+    const isExpired = poll.status === 'ended' || Boolean(poll.pollEndTime && poll.pollEndTime.getTime() <= Date.now());
+    const shouldExposeQuestions = !isExpired || Boolean(poll.isResultPublished);
 
     return {
         poll: {
@@ -63,20 +65,29 @@ export const getPublicPollSnapshotByShareCode = async (shareCode: string) => {
             pollStartTime: poll.pollStartTime,
             pollEndTime: poll.pollEndTime,
             isAnonymousAllowed: poll.isAnonymousAllowed,
+            isResultPublished: poll.isResultPublished ?? false,
             shareCode: poll.shareCode,
             status: poll.status,
         },
-        questions: questions.map((question) => {
+        questions: shouldExposeQuestions ? questions.map((question) => {
             const normalized = normalizeQuestion(question);
             return {
                 ...normalized,
-                options: normalized.options.map((option: { id: string; text: string; order: number; votes: number }) => ({
-                    id: option.id,
-                    text: option.text,
-                    order: option.order,
-                })),
+                options: normalized.options.map((option: { id: string; text: string; order: number; votes: number }) => {
+                    const publicOption: { id: string; text: string; order: number; votes?: number } = {
+                        id: option.id,
+                        text: option.text,
+                        order: option.order,
+                    };
+
+                    if (poll.isResultPublished) {
+                        publicOption.votes = option.votes;
+                    }
+
+                    return publicOption;
+                }),
             };
-        }),
+        }) : [],
     };
 };
 
@@ -101,6 +112,7 @@ export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) =>
             pollStartTime: poll.pollStartTime,
             pollEndTime: poll.pollEndTime,
             isAnonymousAllowed: poll.isAnonymousAllowed,
+            isResultPublished: poll.isResultPublished ?? false,
             analyticsCode: poll.analyticsCode,
             shareCode: poll.shareCode,
             status: poll.status,
@@ -108,6 +120,112 @@ export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) =>
             totalParticipants: voteStats.totalParticipants,
         },
         questions: questions.map((question) => normalizeQuestion(question)),
+    };
+};
+
+export const getParticipantSummaryByAnalyticsCode = async (analyticsCode: string, page = 1, limit = 10) => {
+    const poll = await Poll.findOne({ analyticsCode }).lean();
+
+    if (!poll) {
+        throw new ApiError(404, 'Poll not found');
+    }
+
+    const questions = await Question.find({ pollId: poll._id })
+        .sort({ questionNumber: 1 })
+        .lean();
+
+    const questionById = new Map(
+        questions.map((question) => [
+            String(question._id),
+            {
+                questionNumber: question.questionNumber,
+                question: question.question,
+                options: new Map(
+                    (question.options as any[]).map((option) => [
+                        String(option._id),
+                        {
+                            id: String(option._id),
+                            text: option.text,
+                            order: option.order,
+                        },
+                    ])
+                ),
+            },
+        ])
+    );
+
+    const votes = await Vote.aggregate([
+        { $match: { pollId: poll._id } },
+        { $sort: { createdAt: -1 } },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'user',
+                pipeline: [{ $project: { fullname: 1, email: 1 } }],
+            },
+        },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+    ]);
+
+    const participantMap = new Map<string, any>();
+
+    for (const vote of votes as any[]) {
+        const user = vote.user;
+        const participantKey = user
+            ? `user:${String(user._id)}`
+            : `anonymous:${vote.userFingerPrint}`;
+
+        if (!participantMap.has(participantKey)) {
+            participantMap.set(participantKey, {
+                id: participantKey,
+                name: user?.fullname || [vote.firstName, vote.lastName].filter(Boolean).join(' ') || 'Anonymous participant',
+                email: user?.email || null,
+                type: user ? 'registered' : 'guest',
+                totalAnswers: 0,
+                lastAnsweredAt: vote.createdAt,
+                answers: [],
+            });
+        }
+
+        const participant = participantMap.get(participantKey);
+        const question = questionById.get(String(vote.questionId));
+        const option = question?.options.get(String(vote.optionId));
+
+        participant.totalAnswers += 1;
+        participant.answers.push({
+            questionId: String(vote.questionId),
+            questionNumber: question?.questionNumber ?? null,
+            question: question?.question ?? 'Question deleted',
+            optionId: String(vote.optionId),
+            optionText: option?.text ?? 'Option deleted',
+            answeredAt: vote.createdAt,
+        });
+    }
+
+    const participants = [...participantMap.values()].sort(
+        (a, b) => new Date(b.lastAnsweredAt).getTime() - new Date(a.lastAnsweredAt).getTime()
+    );
+    const totalParticipants = participants.length;
+    const totalPages = Math.max(1, Math.ceil(totalParticipants / limit));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * limit;
+
+    return {
+        poll: {
+            id: String(poll._id),
+            pollName: poll.pollName,
+            analyticsCode: poll.analyticsCode,
+            totalQuestions: questions.length,
+        },
+        participants: participants.slice(start, start + limit),
+        pagination: {
+            page: safePage,
+            limit,
+            totalParticipants,
+            totalPages,
+        },
     };
 };
 

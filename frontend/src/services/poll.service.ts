@@ -48,5 +48,11 @@ export const pollService = {
     async getPublicAnalytics(analyticsCode: string) {
         const response = await api.get(`/public/analytics/${analyticsCode}`);
         return response.data;
+    },
+    async getParticipantSummary(analyticsCode: string, page = 1, limit = 10) {
+        const response = await api.get(`/public/analytics/${analyticsCode}/participants`, {
+            params: { page, limit },
+        });
+        return response.data;
     }
 };

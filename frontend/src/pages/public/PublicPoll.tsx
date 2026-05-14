@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 
 const BACKEND_URL = 'http://localhost:3000';
 const FINGERPRINT_KEY = 'pulseboard-fingerprint';
+const RESULT_COLORS = ['#10b981', '#3b82f6', '#a855f7', '#f59e0b', '#ec4899', '#06b6d4'];
 
 interface PublicPollSnapshot {
     poll: any;
@@ -62,6 +63,60 @@ const CountdownTimer: React.FC<{ endTime: string | null }> = ({ endTime }) => {
     );
 };
 
+const PollResults: React.FC<{ questions: any[] }> = ({ questions }) => (
+    <div className="space-y-6">
+        {questions.map((q: any) => {
+            const totalVotes = q.options.reduce((sum: number, option: any) => sum + (option.votes || 0), 0);
+
+            return (
+                <Card key={q._id || q.id} className="overflow-hidden border-zinc-800 bg-zinc-900/40 backdrop-blur-md">
+                    <CardHeader className="border-b border-zinc-800/50 bg-zinc-950/30 pb-4">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                            Question {q.questionNumber}
+                        </span>
+                        <CardTitle className="text-xl font-medium leading-relaxed">
+                            <div
+                                className="prose prose-invert prose-sm max-w-none prose-headings:text-zinc-100"
+                                dangerouslySetInnerHTML={{ __html: q.question }}
+                            />
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 p-6">
+                        {q.options.map((opt: any, index: number) => {
+                            const votes = opt.votes || 0;
+                            const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+                            const color = RESULT_COLORS[index % RESULT_COLORS.length];
+
+                            return (
+                                <div key={opt._id || opt.id} className="space-y-2">
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: color }} />
+                                        <div
+                                            className="min-w-0 flex-1 truncate text-zinc-300 prose prose-invert prose-sm max-w-none prose-p:m-0 [&>*]:inline"
+                                            dangerouslySetInnerHTML={{ __html: opt.text }}
+                                        />
+                                        <span className="font-semibold tabular-nums text-zinc-50">{votes}</span>
+                                        <span className="w-11 text-right tabular-nums text-zinc-500">{pct}%</span>
+                                    </div>
+                                    <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                                        <div
+                                            className="h-full rounded-full transition-all"
+                                            style={{
+                                                width: `${pct}%`,
+                                                backgroundColor: color,
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </CardContent>
+                </Card>
+            );
+        })}
+    </div>
+);
+
 export const PublicPoll: React.FC = () => {
     const { shareCode } = useParams();
     const navigate = useNavigate();
@@ -76,6 +131,7 @@ export const PublicPoll: React.FC = () => {
     const [lastName, setLastName] = useState('');
     const [identitySaved, setIdentitySaved] = useState(false);
     const [answeredQuestions, setAnsweredQuestions] = useState<Record<string, string>>({});
+    const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
         const loadPoll = async () => {
@@ -126,6 +182,11 @@ export const PublicPoll: React.FC = () => {
             newSocket.disconnect();
         };
     }, [shareCode, isLoading, authLoading, accessToken]);
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     const getFingerprint = useCallback(() => {
         let fp = localStorage.getItem(FINGERPRINT_KEY);
@@ -193,6 +254,8 @@ export const PublicPoll: React.FC = () => {
     const { poll, questions } = snapshot;
     const requiresSignin = !poll.isAnonymousAllowed && !isAuthenticated;
     const needsIdentity = poll.isAnonymousAllowed && !isAuthenticated && !identitySaved;
+    const isExpired = poll.status === 'ended' || (poll.pollEndTime && new Date(poll.pollEndTime).getTime() <= now);
+    const canShowQuestions = !requiresSignin && !isExpired;
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-50 selection:bg-zinc-800">
@@ -249,7 +312,25 @@ export const PublicPoll: React.FC = () => {
                     </Card>
                 )}
 
-                {needsIdentity && !requiresSignin && (
+                {isExpired && !poll.isResultPublished && !requiresSignin && (
+                    <Card className="mb-8 border-amber-500/30 bg-amber-500/10 backdrop-blur-md">
+                        <CardContent className="flex items-center gap-4 p-6 text-amber-100">
+                            <Clock className="h-8 w-8 shrink-0 text-amber-400" />
+                            <div>
+                                <h3 className="mb-1 font-semibold text-amber-300">Poll expired</h3>
+                                <p className="text-sm text-amber-100/80">Questions are no longer visible. Results will appear here when the creator publishes them.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {poll.isResultPublished && (
+                    <div className="mb-8 rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+                        Published results are available below.
+                    </div>
+                )}
+
+                {needsIdentity && !requiresSignin && !isExpired && (
                     <Card className="mb-8 border-zinc-800 bg-zinc-900/50 backdrop-blur-md">
                         <CardHeader>
                             <CardTitle className="text-lg">Enter your details to vote</CardTitle>
@@ -289,15 +370,18 @@ export const PublicPoll: React.FC = () => {
                     </Card>
                 )}
 
+                {poll.isResultPublished ? (
+                    <PollResults questions={questions} />
+                ) : (
                 <div className="space-y-6">
-                    {questions.length === 0 ? (
+                    {!canShowQuestions ? null : questions.length === 0 ? (
                         <div className="text-center py-12 text-zinc-500">
                             No questions have been added to this poll yet.
                         </div>
                     ) : (
                         questions.map((q: any) => {
                             const selectedOptionId = answeredQuestions[q._id || q.id];
-                            const isDisabled = requiresSignin || (needsIdentity && !identitySaved) || !!selectedOptionId || poll.status !== 'active';
+                            const isDisabled = requiresSignin || (needsIdentity && !identitySaved) || !!selectedOptionId || poll.status !== 'active' || isExpired;
 
                             return (
                                 <Card key={q._id || q.id} className="border-zinc-800 bg-zinc-900/40 backdrop-blur-md overflow-hidden transition-all hover:bg-zinc-900/60">
@@ -353,6 +437,7 @@ export const PublicPoll: React.FC = () => {
                         })
                     )}
                 </div>
+                )}
             </main>
         </div>
     );

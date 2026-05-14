@@ -10,6 +10,7 @@ export interface IPoll {
     isAnonymousAllowed: boolean;
     shareCode: string;
     analyticsCode: string;
+    isResultPublished: boolean;
     status: 'draft' | 'active' | 'ended';
     totalVotes: number;
     totalParticipants: number;
@@ -35,6 +36,11 @@ const PollSchema: Schema = new Schema<IPoll>({
         required: true,
         unique: true,
         default: () => new mongoose.Types.ObjectId().toString(),
+    },
+    isResultPublished: {
+        type: Boolean,
+        required: true,
+        default: false,
     },
 
     status: {

@@ -12,6 +12,11 @@ export const analyticsCodeParamsSchema = z.object({
     }),
 });
 
+export const participantSummaryQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
 export const submitVoteSocketSchema = z.object({
     pollId: z.string().trim().min(1, {
         message: 'Poll id is required',
