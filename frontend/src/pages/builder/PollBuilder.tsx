@@ -60,6 +60,7 @@ export const PollBuilder: React.FC = () => {
     ]);
 
     const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+    const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([]);
 
     useEffect(() => {
         if (isEditing) {
@@ -69,7 +70,7 @@ export const PollBuilder: React.FC = () => {
                     const res = await pollService.getPollById(pollId!);
                     if (res.success && res.data) {
                         const { poll, questions: apiQuestions } = res.data;
-                        
+
                         setPollName(poll.pollName);
                         setPollDescription(poll.pollDescription);
                         setPollDurationInMinutes(poll.pollDurationInMinutes);
@@ -87,6 +88,7 @@ export const PollBuilder: React.FC = () => {
                                 }))
                             })));
                         }
+                        setDeletedQuestionIds([]);
                     } else {
                         throw new Error("Failed to load poll");
                     }
@@ -123,7 +125,13 @@ export const PollBuilder: React.FC = () => {
             if (isEditing && currentPollId) {
                 await pollService.updatePoll(currentPollId, pollPayload);
                 updatePollLocal(currentPollId, pollPayload);
-                
+
+                for (const questionId of deletedQuestionIds) {
+                    await pollService.deleteQuestion(currentPollId, questionId);
+                }
+
+                const savedQuestions: QuestionForm[] = [];
+
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.id.startsWith('q-')) {
@@ -133,7 +141,10 @@ export const PollBuilder: React.FC = () => {
                             options: q.options.map((o, index) => ({ text: o.text || 'Empty Option', order: index + 1 }))
                         });
                         if (newQRes.success && newQRes.data) {
-                            q.id = newQRes.data._id || newQRes.data.id;
+                            savedQuestions.push({
+                                ...q,
+                                id: newQRes.data._id || newQRes.data.id,
+                            });
                         }
                     } else {
                         await pollService.updateQuestion(currentPollId, q.id, {
@@ -146,10 +157,14 @@ export const PollBuilder: React.FC = () => {
                                 });
                             }
                         }
+                        savedQuestions.push(q);
                     }
                 }
-                
-                const orderPayload = questions.filter(q => !q.id.startsWith('q-')).map((q, index) => ({
+
+                setQuestions(savedQuestions);
+                setDeletedQuestionIds([]);
+
+                const orderPayload = savedQuestions.map((q, index) => ({
                     questionId: q.id,
                     questionNumber: index + 1
                 }));
@@ -157,7 +172,7 @@ export const PollBuilder: React.FC = () => {
                 if (orderPayload.length > 0) {
                     await pollService.updateQuestionOrder(currentPollId, orderPayload);
                 }
-                
+
                 toast.success("Poll updated successfully");
             } else {
                 const createRes = await pollService.createPoll(pollPayload);
@@ -176,8 +191,6 @@ export const PollBuilder: React.FC = () => {
                     toast.success("Poll created successfully");
                 }
             }
-
-            navigate('/dashboard');
         } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to save poll");
@@ -203,6 +216,18 @@ export const PollBuilder: React.FC = () => {
     };
 
     const removeQuestion = (qIndex: number) => {
+        const questionToRemove = questions[qIndex];
+
+        if (isEditing && questionToRemove && !questionToRemove.id.startsWith('q-')) {
+            setDeletedQuestionIds((prev) => (
+                prev.includes(questionToRemove.id) ? prev : [...prev, questionToRemove.id]
+            ));
+        }
+
+        if (editingQuestionId === questionToRemove?.id) {
+            setEditingQuestionId(null);
+        }
+
         setQuestions(questions.filter((_, i) => i !== qIndex));
     };
 
@@ -280,15 +305,15 @@ export const PollBuilder: React.FC = () => {
                     </h1>
                 </div>
                 <div className="ml-auto flex items-center gap-3">
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
                         onClick={() => setStatus(status === 'draft' ? 'active' : 'draft')}
                     >
                         Status: {status}
                     </Button>
-                    <Button 
-                        onClick={handleSave} 
+                    <Button
+                        onClick={handleSave}
                         disabled={isSaving}
                         className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
                     >
@@ -307,32 +332,32 @@ export const PollBuilder: React.FC = () => {
                         <CardContent className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="pollName" className="text-zinc-300">Name</Label>
-                                <Input 
-                                    id="pollName" 
-                                    value={pollName} 
-                                    onChange={(e) => setPollName(e.target.value)} 
+                                <Input
+                                    id="pollName"
+                                    value={pollName}
+                                    onChange={(e) => setPollName(e.target.value)}
                                     placeholder="Weekly Standup Feedback"
                                     className="bg-zinc-950/50 border-zinc-800 focus-visible:ring-zinc-700"
                                 />
                             </div>
-                            
+
                             <div className="space-y-2">
                                 <Label className="text-zinc-300">Description</Label>
-                                <RichTextEditor 
-                                    content={pollDescription} 
-                                    onChange={setPollDescription} 
-                                    placeholder="Describe the purpose of this poll..." 
+                                <RichTextEditor
+                                    content={pollDescription}
+                                    onChange={setPollDescription}
+                                    placeholder="Describe the purpose of this poll..."
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="duration" className="text-zinc-300">Duration (Minutes)</Label>
-                                <Input 
-                                    id="duration" 
-                                    type="number" 
+                                <Input
+                                    id="duration"
+                                    type="number"
                                     min="1"
-                                    value={pollDurationInMinutes} 
-                                    onChange={(e) => setPollDurationInMinutes(Number(e.target.value))} 
+                                    value={pollDurationInMinutes}
+                                    onChange={(e) => setPollDurationInMinutes(Number(e.target.value))}
                                     className="bg-zinc-950/50 border-zinc-800 focus-visible:ring-zinc-700"
                                 />
                             </div>
@@ -342,8 +367,8 @@ export const PollBuilder: React.FC = () => {
                                     <Label className="text-zinc-300">Anonymous Responses</Label>
                                     <div className="text-sm text-zinc-500">Allow users to vote without logging in.</div>
                                 </div>
-                                <Switch 
-                                    checked={isAnonymousAllowed} 
+                                <Switch
+                                    checked={isAnonymousAllowed}
                                     onCheckedChange={setIsAnonymousAllowed}
                                     className="data-[state=checked]:bg-zinc-50"
                                 />
@@ -367,14 +392,14 @@ export const PollBuilder: React.FC = () => {
                                     {questions.map((q, index) => (
                                         <Draggable key={q.id} draggableId={q.id} index={index}>
                                             {(provided) => (
-                                                <Card 
+                                                <Card
                                                     ref={provided.innerRef}
                                                     {...provided.draggableProps}
                                                     className="border-zinc-800 bg-zinc-900/40 backdrop-blur-sm group"
                                                 >
                                                     <div className="flex items-center p-4">
-                                                        <div 
-                                                            {...provided.dragHandleProps} 
+                                                        <div
+                                                            {...provided.dragHandleProps}
                                                             className="cursor-grab hover:text-zinc-300 text-zinc-500 mr-4"
                                                         >
                                                             <GripVertical className="h-5 w-5" />
@@ -386,17 +411,17 @@ export const PollBuilder: React.FC = () => {
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <Button 
-                                                                variant="outline" 
+                                                            <Button
+                                                                variant="outline"
                                                                 size="sm"
                                                                 onClick={() => setEditingQuestionId(q.id)}
                                                                 className="border-zinc-700 bg-zinc-950/50 hover:bg-zinc-800"
                                                             >
                                                                 <Edit2 className="h-3 w-3 mr-2" /> Edit
                                                             </Button>
-                                                            <Button 
-                                                                variant="ghost" 
-                                                                size="icon" 
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
                                                                 onClick={() => removeQuestion(index)}
                                                                 className="text-zinc-500 hover:text-red-500 hover:bg-red-500/10"
                                                                 disabled={questions.length <= 1}
@@ -418,16 +443,16 @@ export const PollBuilder: React.FC = () => {
             </div>
 
             <Dialog open={!!editingQuestionId} onOpenChange={(open) => !open && setEditingQuestionId(null)}>
-                <DialogContent className="sm:max-w-[700px] bg-zinc-950 border-zinc-800 text-zinc-50 p-0 overflow-hidden flex flex-col max-h-[90vh]">
+                <DialogContent className="sm:max-w-175 bg-zinc-950 border-zinc-800 text-zinc-50 p-0 overflow-hidden flex flex-col max-h-[90vh]">
                     <DialogHeader className="p-6 pb-4 border-b border-zinc-800/50 bg-zinc-900/20">
                         <DialogTitle className="text-xl">Edit Question</DialogTitle>
                     </DialogHeader>
-                    
+
                     {editingQuestion && (
                         <div className="p-6 overflow-y-auto flex-1 space-y-8">
                             <div className="space-y-3">
                                 <Label className="text-base text-zinc-300">Question Text</Label>
-                                <RichTextEditor 
+                                <RichTextEditor
                                     content={editingQuestion.question}
                                     onChange={(val) => updateQuestionText(editingQuestion.id, val)}
                                     placeholder="Ask something..."
@@ -439,9 +464,9 @@ export const PollBuilder: React.FC = () => {
                                 <div className="flex items-center justify-between">
                                     <Label className="text-base text-zinc-300">Options ({editingQuestion.options.length}/4)</Label>
                                     {editingQuestion.options.length < 4 && (
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
                                             onClick={() => addOption(editingQuestion.id)}
                                             className="border-zinc-800 hover:bg-zinc-800 text-zinc-300"
                                         >
@@ -449,7 +474,7 @@ export const PollBuilder: React.FC = () => {
                                         </Button>
                                     )}
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     {editingQuestion.options.map((opt, oIndex) => (
                                         <div key={opt.id} className="relative rounded-md border border-zinc-800 bg-zinc-900/20 p-1">
@@ -457,7 +482,7 @@ export const PollBuilder: React.FC = () => {
                                                 {String.fromCharCode(65 + oIndex)}
                                             </div>
                                             <div className="pl-8 relative group">
-                                                <RichTextEditor 
+                                                <RichTextEditor
                                                     content={opt.text}
                                                     onChange={(val) => updateOptionText(editingQuestion.id, opt.id, val)}
                                                     placeholder={`Option ${oIndex + 1}`}
@@ -479,9 +504,9 @@ export const PollBuilder: React.FC = () => {
                             </div>
                         </div>
                     )}
-                    
+
                     <DialogFooter className="p-4 border-t border-zinc-800 bg-zinc-900/20">
-                        <Button 
+                        <Button
                             onClick={() => setEditingQuestionId(null)}
                             className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
                         >

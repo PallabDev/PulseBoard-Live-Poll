@@ -1,5 +1,6 @@
 import type mongoose from "mongoose";
 import { Poll, Question } from "./model.js";
+import Vote from "../vote/model.js";
 import ApiError from "../../common/utils/ApiError.js";
 
 import type { ICreatePoll, ICreateQuestion, IUpdateOption, IUpdatePoll, IUpdateQuestion, IUpdateQuestionOrder } from "./validator.js"
@@ -100,6 +101,52 @@ export const updateQuestionService = async ({ pollId, questionId, userId, questi
 
     const updatedQuestion = await questionDoc.save();
     return updatedQuestion;
+}
+
+
+type DeleteQuestionServiceInput = {
+    pollId: string;
+    questionId: string;
+    userId: mongoose.Types.ObjectId;
+};
+
+export const deleteQuestionService = async ({ pollId, questionId, userId }: DeleteQuestionServiceInput) => {
+    const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
+
+    if (!poll) {
+        throw new ApiError(404, "Poll not found");
+    }
+
+    const questionDoc = await Question.findOne({ _id: questionId, pollId });
+
+    if (!questionDoc) {
+        throw new ApiError(404, "Question not found");
+    }
+
+    await Vote.deleteMany({ pollId: poll._id, questionId: questionDoc._id });
+    await questionDoc.deleteOne();
+
+    const votes = await Vote.collection.find({ pollId: poll._id }, {
+        projection: {
+            userId: 1,
+            userFingerPrint: 1,
+        },
+    }).toArray();
+    const participantKeys = new Set<string>();
+
+    for (const vote of votes) {
+        if (vote.userId) {
+            participantKeys.add(`user:${String(vote.userId)}`);
+        } else if (vote.userFingerPrint) {
+            participantKeys.add(`anonymous:${vote.userFingerPrint}`);
+        }
+    }
+
+    poll.totalVotes = votes.length;
+    poll.totalParticipants = participantKeys.size;
+    await poll.save();
+
+    return questionDoc;
 }
 
 

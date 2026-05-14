@@ -52,7 +52,7 @@ export const ResetPassword: React.FC = () => {
     if (isSuccess) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 selection:bg-zinc-800">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/20 via-zinc-950 to-zinc-950"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-zinc-900/20 via-zinc-950 to-zinc-950"></div>
                 <div className="relative z-10 w-full max-w-sm space-y-6">
                     <Card className="border-zinc-800 bg-zinc-900/30 backdrop-blur-xl shadow-2xl">
                         <CardContent className="flex flex-col items-center gap-5 pt-8 pb-8 px-8 text-center">
@@ -79,7 +79,7 @@ export const ResetPassword: React.FC = () => {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 selection:bg-zinc-800">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/20 via-zinc-950 to-zinc-950"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-zinc-900/20 via-zinc-950 to-zinc-950"></div>
 
             <div className="relative z-10 w-full max-w-sm space-y-6">
                 <div className="flex items-center justify-center gap-3 mb-2">

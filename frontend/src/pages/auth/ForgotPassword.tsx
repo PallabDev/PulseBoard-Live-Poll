@@ -30,7 +30,7 @@ export const ForgotPassword: React.FC = () => {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 selection:bg-zinc-800">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/20 via-zinc-950 to-zinc-950"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-zinc-900/20 via-zinc-950 to-zinc-950"></div>
 
             <div className="relative z-10 w-full max-w-sm space-y-6">
                 <div className="flex items-center justify-center gap-3 mb-2">

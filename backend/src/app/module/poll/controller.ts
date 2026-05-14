@@ -5,7 +5,7 @@ import ApiResponse from "../../common/utils/ApiResponse.js";
 import ApiError from "../../common/utils/ApiError.js";
 
 // services
-import { createPollService, createQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService, getAllPollsService, getPollByIdService } from "./services.js";
+import { createPollService, createQuestionService, deleteQuestionService, updateOptionService, updatePollService, updateQuestionOrderService, updateQuestionService, getAllPollsService, getPollByIdService } from "./services.js";
 
 // zod validator schema
 import { createPollSchema, createQuestionSchema, updatePollSchema, updateQuestionOrderSchema, updateQuestionSchema, updateSingleOptionSchema } from "./validator.js";
@@ -99,6 +99,33 @@ const updateQuestion = async (req: Request, res: Response) => {
             return res.status(error.statusCode).json(ApiResponse.error(error.message));
         }
         console.error("Update question error:", error);
+        return res.status(500).json(ApiResponse.error("Internal server error"));
+    }
+}
+
+
+const deleteQuestion = async (req: Request, res: Response) => {
+    const { pollId, questionId } = req.params;
+    if (!pollId || Array.isArray(pollId)) {
+        return res.status(400).json(ApiResponse.error("Poll id is required"));
+    }
+
+    if (!questionId || Array.isArray(questionId)) {
+        return res.status(400).json(ApiResponse.error("Question id is required"));
+    }
+
+    try {
+        const question = await deleteQuestionService({
+            pollId,
+            questionId,
+            userId: req.user!._id,
+        });
+        return res.status(200).json(ApiResponse.success("Question deleted successfully", question));
+    } catch (error) {
+        if (error instanceof ApiError) {
+            return res.status(error.statusCode).json(ApiResponse.error(error.message));
+        }
+        console.error("Delete question error:", error);
         return res.status(500).json(ApiResponse.error("Internal server error"));
     }
 }
@@ -239,4 +266,4 @@ const getPollById = async (req: Request, res: Response) => {
     }
 }
 
-export { createPoll, createQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById };
+export { createPoll, createQuestion, deleteQuestion, updateOption, updatePoll, updateQuestion, updateQuestionOrder, getAllPolls, getPollById };

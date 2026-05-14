@@ -25,6 +25,10 @@ export const pollService = {
         const response = await api.patch(`/poll/${pollId}/question/${questionId}`, data);
         return response.data;
     },
+    async deleteQuestion(pollId: string, questionId: string) {
+        const response = await api.delete(`/poll/${pollId}/question/${questionId}`);
+        return response.data;
+    },
     async updateQuestionOrder(pollId: string, data: { questionId: string, questionNumber: number }[]) {
         const response = await api.patch(`/poll/${pollId}/questions/order`, data);
         return response.data;

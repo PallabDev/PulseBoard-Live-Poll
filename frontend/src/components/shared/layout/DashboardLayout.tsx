@@ -14,10 +14,10 @@ export const DashboardLayout: React.FC = () => {
             {/* Main Content Area */}
             <div className="flex flex-1 flex-col overflow-hidden relative">
                 {/* Background Gradient Effect matching the SaaS vibe */}
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/40 via-zinc-950 to-zinc-950 -z-10"></div>
-                
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-zinc-900/40 via-zinc-950 to-zinc-950 -z-10"></div>
+
                 <Topbar />
-                
+
                 <main className="flex-1 overflow-y-auto p-4 md:p-8">
                     <div className="mx-auto max-w-6xl">
                         <Outlet />
