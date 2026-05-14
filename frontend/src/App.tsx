@@ -1,5 +1,5 @@
 // Removed unused React import
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
 import { SignIn } from './pages/auth/SignIn';
@@ -14,6 +14,7 @@ import { VerifyEmail } from './pages/auth/VerifyEmail';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
 import { Toaster } from '@/components/ui/sonner';
+import Home from '@/pages/Home';
 
 function App() {
   return (
@@ -37,8 +38,8 @@ function App() {
             <Route path="edit/:pollId" element={<PollBuilder />} />
           </Route>
 
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Home Page */}
+          <Route path="/" element={<Home />} />
         </Routes>
       </Router>
       <Toaster theme="dark" />
