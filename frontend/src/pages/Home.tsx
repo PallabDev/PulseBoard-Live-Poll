@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { 
-  BarChart3, Users, Lock, Eye, EyeOff, Globe, 
-  ChevronDown, ChevronUp, CheckCircle2, Zap, ArrowRight, Activity, 
+import {
+  BarChart3, Users, Lock, Eye, EyeOff, Globe,
+  ChevronDown, ChevronUp, CheckCircle2, Zap, ArrowRight, Activity,
   Menu, X, PieChart, Clock, ShieldCheck, Link as LinkIcon,
   MessageSquare, Presentation, Building2, Terminal, Users2, Sparkles, Plus, Play
 } from "lucide-react";
@@ -57,9 +57,9 @@ const Navbar = () => {
       {/* Mobile Nav */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-20 left-4 right-4 md:hidden border border-white/10 bg-zinc-900/95 backdrop-blur-xl rounded-xl p-4 shadow-2xl pointer-events-auto"
           >
@@ -88,29 +88,29 @@ const Hero = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-sm"
           >
             <Sparkles className="w-4 h-4 text-rose-400" />
             <span className="text-sm font-medium text-zinc-300">The modern way to engage your audience</span>
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
             className="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 mb-6"
           >
-            Live polls that keep <br className="hidden md:block"/> every room engaged.
+            Live polls that keep <br className="hidden md:block" /> every room engaged.
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed"
           >
             Create interactive polls, collect responses in real time, track live analytics, and publish results when you're ready. Built for classrooms, events, teams, and communities.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
@@ -128,7 +128,7 @@ const Hero = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.5 }}
             className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-zinc-500 font-medium"
           >
@@ -140,14 +140,14 @@ const Hero = () => {
         </div>
 
         {/* Dashboard Mockup */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}
           className="mt-20 relative mx-auto max-w-5xl group"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent z-10 top-1/2"></div>
           {/* Subtle glow behind mockup on hover */}
           <div className="absolute -inset-1 bg-gradient-to-r from-rose-500/20 to-orange-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
-          
+
           <div className="relative rounded-xl border border-white/10 bg-zinc-900/80 backdrop-blur-xl shadow-2xl overflow-hidden transition-transform duration-500">
             {/* Browser Header */}
             <div className="flex items-center px-4 py-3 border-b border-white/5 bg-zinc-950/80">
@@ -211,7 +211,7 @@ const Hero = () => {
                         <span className="text-zinc-400">{opt.percent}% ({opt.votes})</span>
                       </div>
                       <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <motion.div 
+                        <motion.div
                           initial={{ width: 0 }} animate={{ width: `${opt.percent}%` }} transition={{ duration: 1, delay: 0.8 + i * 0.1 }}
                           className={`h-full ${opt.color} rounded-full`}
                         ></motion.div>
@@ -244,12 +244,12 @@ const ProblemSection = () => {
             { icon: EyeOff, title: "Results when you decide", desc: "Keep responses hidden while people vote, then reveal them for maximum impact." },
             { icon: Users, title: "Participant summaries", desc: "Don't just see the totals. Understand exactly how individual users answered." }
           ].map((item, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
               whileHover={{ y: -5 }}
               className="group relative p-6 rounded-lg bg-zinc-900 border border-white/5 hover:border-white/10 hover:bg-zinc-800/80 transition-all overflow-hidden"
             >
@@ -289,7 +289,7 @@ const FeaturesSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {features.map((feature, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -299,7 +299,7 @@ const FeaturesSection = () => {
             >
               {/* Magic UI style spotlight hover effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
+
               <feature.icon className="w-8 h-8 text-zinc-400 mb-6 group-hover:text-rose-400 transition-colors duration-300" />
               <h3 className="text-xl font-bold text-white mb-2 relative z-10">{feature.title}</h3>
               <p className="text-zinc-400 text-sm leading-relaxed relative z-10">{feature.desc}</p>
@@ -315,13 +315,13 @@ const AnalyticsShowcase = () => {
   return (
     <section id="analytics" className="py-24 bg-zinc-950 relative border-y border-white/5 overflow-hidden">
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[120px] opacity-50 pointer-events-none"></div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">See the pulse of your audience as it happens.</h2>
             <p className="text-lg text-zinc-400 mb-8">PulseBoard turns responses into clean, real-time insight with charts, participant summaries, and publish controls. No more waiting for surveys to close.</p>
-            
+
             <ul className="space-y-4 mb-10">
               {['Live socket updates as people vote', 'Colorful, easy-to-read charts', 'Total votes and participant tracking', 'One-click publish results control'].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-zinc-300">
@@ -330,50 +330,50 @@ const AnalyticsShowcase = () => {
                 </li>
               ))}
             </ul>
-            
+
             <div className="flex gap-4">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-3 bg-white text-zinc-950 font-semibold rounded-md hover:bg-zinc-200 transition-colors shadow-lg">Explore Analytics</motion.button>
             </div>
           </div>
-          
+
           <div className="relative group">
-             <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/30 to-orange-500/30 rounded-xl opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-700"></div>
-             <div className="relative bg-zinc-900 border border-white/10 rounded-xl p-6 shadow-2xl">
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-3 w-3 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-                    </span>
-                    <span className="text-sm font-medium text-white">Live Updates</span>
-                  </div>
-                  <div className="bg-white/5 text-xs text-zinc-400 px-3 py-1 rounded-md border border-white/10">34 new votes</div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/30 to-orange-500/30 rounded-xl opacity-20 blur-xl group-hover:opacity-40 transition-opacity duration-700"></div>
+            <div className="relative bg-zinc-900 border border-white/10 rounded-xl p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-3 w-3 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                  </span>
+                  <span className="text-sm font-medium text-white">Live Updates</span>
                 </div>
-                
-                <div className="space-y-6">
-                  {/* Mock Chart 1 */}
-                  <div>
-                    <h5 className="text-sm text-zinc-300 mb-3 font-medium">How familiar are you with React?</h5>
-                    <div className="flex gap-2 h-24 items-end bg-zinc-950 p-4 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
-                      <motion.div initial={{ height: "20%" }} animate={{ height: "80%" }} transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-cyan-500 rounded-t-sm"></motion.div>
-                      <motion.div initial={{ height: "40%" }} animate={{ height: "60%" }} transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-amber-500 rounded-t-sm"></motion.div>
-                      <motion.div initial={{ height: "10%" }} animate={{ height: "30%" }} transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-orange-500 rounded-t-sm"></motion.div>
-                      <motion.div initial={{ height: "60%" }} animate={{ height: "90%" }} transition={{ duration: 1.8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-rose-500 rounded-t-sm"></motion.div>
-                    </div>
-                  </div>
-                  {/* Mock Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-zinc-950 p-4 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
-                      <p className="text-xs text-zinc-500 mb-1">Completion Rate</p>
-                      <p className="text-xl font-bold text-white">84%</p>
-                    </div>
-                    <div className="bg-zinc-950 p-4 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
-                      <p className="text-xs text-zinc-500 mb-1">Avg. Time</p>
-                      <p className="text-xl font-bold text-white">42s</p>
-                    </div>
+                <div className="bg-white/5 text-xs text-zinc-400 px-3 py-1 rounded-md border border-white/10">34 new votes</div>
+              </div>
+
+              <div className="space-y-6">
+                {/* Mock Chart 1 */}
+                <div>
+                  <h5 className="text-sm text-zinc-300 mb-3 font-medium">How familiar are you with React?</h5>
+                  <div className="flex gap-2 h-24 items-end bg-zinc-950 p-4 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
+                    <motion.div initial={{ height: "20%" }} animate={{ height: "80%" }} transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-cyan-500 rounded-t-sm"></motion.div>
+                    <motion.div initial={{ height: "40%" }} animate={{ height: "60%" }} transition={{ duration: 1.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-amber-500 rounded-t-sm"></motion.div>
+                    <motion.div initial={{ height: "10%" }} animate={{ height: "30%" }} transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-orange-500 rounded-t-sm"></motion.div>
+                    <motion.div initial={{ height: "60%" }} animate={{ height: "90%" }} transition={{ duration: 1.8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} className="w-1/4 bg-rose-500 rounded-t-sm"></motion.div>
                   </div>
                 </div>
-             </div>
+                {/* Mock Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-zinc-950 p-4 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
+                    <p className="text-xs text-zinc-500 mb-1">Completion Rate</p>
+                    <p className="text-xl font-bold text-white">84%</p>
+                  </div>
+                  <div className="bg-zinc-950 p-4 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
+                    <p className="text-xs text-zinc-500 mb-1">Avg. Time</p>
+                    <p className="text-xl font-bold text-white">42s</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -398,11 +398,19 @@ const HowItWorks = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-          <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-          
+          <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent overflow-hidden">
+            <motion.div
+              className="absolute top-0 h-full w-[150px] bg-gradient-to-r from-transparent via-rose-500 to-transparent"
+              style={{ boxShadow: "0 0 10px 1px rgba(244, 63, 94, 0.5)" }}
+              initial={{ left: "-20%", opacity: 0 }}
+              animate={{ left: "100%", opacity: [0, 1, 1, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+
           {steps.map((step, i) => (
-            <motion.div 
-              key={i} 
+            <motion.div
+              key={i}
               className="relative flex flex-col items-center text-center group"
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
@@ -443,8 +451,8 @@ const UseCases = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {cases.map((item, i) => (
-            <motion.div 
-              key={i} 
+            <motion.div
+              key={i}
               whileHover={{ scale: 1.02 }}
               className="p-8 rounded-lg bg-zinc-950 border border-white/5 hover:border-rose-500/30 hover:bg-zinc-900 transition-all group shadow-sm hover:shadow-lg hover:shadow-rose-500/5"
             >
@@ -465,59 +473,59 @@ const UserSummary = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="order-2 lg:order-1">
-             <div className="relative bg-zinc-900 border border-white/10 rounded-xl p-2 shadow-2xl group hover:border-white/20 transition-colors duration-500">
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl"></div>
-                <div className="bg-zinc-950 rounded-lg overflow-hidden border border-white/5 relative z-10">
-                  <div className="grid grid-cols-3 bg-white/5 p-4 text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                    <div>Participant</div>
-                    <div>Type</div>
-                    <div>Responses</div>
-                  </div>
-                  {[
-                    { name: "Alex Johnson", type: "Registered", count: "4/4", isOpen: true },
-                    { name: "Guest User", type: "Anonymous", count: "3/4", isOpen: false },
-                    { name: "Sarah Smith", type: "Registered", count: "4/4", isOpen: false },
-                  ].map((user, i) => (
-                    <div key={i} className="border-t border-white/5 p-4 text-sm flex flex-col hover:bg-white/[0.02] transition-colors cursor-pointer">
-                      <div className="grid grid-cols-3 items-center">
-                        <div className="font-medium text-white flex items-center gap-2">
-                          <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${user.isOpen ? 'rotate-180' : ''}`} /> {user.name}
-                        </div>
-                        <div className="text-zinc-400">
-                          <span className={`px-2 py-1 rounded-md text-xs ${user.type === 'Registered' ? 'bg-rose-500/10 text-rose-400' : 'bg-zinc-800 text-zinc-400'}`}>{user.type}</span>
-                        </div>
-                        <div className="text-zinc-400">{user.count}</div>
-                      </div>
-                      <AnimatePresence>
-                        {user.isOpen && (
-                          <motion.div 
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="mt-4 pl-6 space-y-3 border-l-2 border-rose-500/30 ml-2 py-2">
-                              <div>
-                                <p className="text-xs text-zinc-500 mb-1">Q1: Preferred framework?</p>
-                                <p className="text-white font-medium">React (Next.js)</p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-zinc-500 mb-1">Q2: Years of experience?</p>
-                                <p className="text-white font-medium">3-5 years</p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
+            <div className="relative bg-zinc-900 border border-white/10 rounded-xl p-2 shadow-2xl group hover:border-white/20 transition-colors duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl"></div>
+              <div className="bg-zinc-950 rounded-lg overflow-hidden border border-white/5 relative z-10">
+                <div className="grid grid-cols-3 bg-white/5 p-4 text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                  <div>Participant</div>
+                  <div>Type</div>
+                  <div>Responses</div>
                 </div>
-             </div>
+                {[
+                  { name: "Alex Johnson", type: "Registered", count: "4/4", isOpen: true },
+                  { name: "Guest User", type: "Anonymous", count: "3/4", isOpen: false },
+                  { name: "Sarah Smith", type: "Registered", count: "4/4", isOpen: false },
+                ].map((user, i) => (
+                  <div key={i} className="border-t border-white/5 p-4 text-sm flex flex-col hover:bg-white/[0.02] transition-colors cursor-pointer">
+                    <div className="grid grid-cols-3 items-center">
+                      <div className="font-medium text-white flex items-center gap-2">
+                        <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${user.isOpen ? 'rotate-180' : ''}`} /> {user.name}
+                      </div>
+                      <div className="text-zinc-400">
+                        <span className={`px-2 py-1 rounded-md text-xs ${user.type === 'Registered' ? 'bg-rose-500/10 text-rose-400' : 'bg-zinc-800 text-zinc-400'}`}>{user.type}</span>
+                      </div>
+                      <div className="text-zinc-400">{user.count}</div>
+                    </div>
+                    <AnimatePresence>
+                      {user.isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-4 pl-6 space-y-3 border-l-2 border-rose-500/30 ml-2 py-2">
+                            <div>
+                              <p className="text-xs text-zinc-500 mb-1">Q1: Preferred framework?</p>
+                              <p className="text-white font-medium">React (Next.js)</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-zinc-500 mb-1">Q2: Years of experience?</p>
+                              <p className="text-white font-medium">3-5 years</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          
+
           <div className="order-1 lg:order-2">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Know not just what people voted, but who responded.</h2>
             <p className="text-lg text-zinc-400 mb-8">Review participant-level responses in a clean, paginated summary built for real follow-up and deeper understanding.</p>
-            
+
             <div className="space-y-6">
               <div className="flex gap-4 group cursor-default">
                 <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-rose-500/10 transition-colors">
@@ -558,11 +566,11 @@ const Testimonials = () => {
       <div className="text-center mb-16 max-w-3xl mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Loved by educators and teams.</h2>
       </div>
-      
+
       <div className="relative flex overflow-x-hidden group">
         <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none"></div>
         <div className="absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none"></div>
-        
+
         <div className="flex space-x-6 animate-[marquee_30s_linear_infinite] group-hover:[animation-play-state:paused] whitespace-nowrap pl-6">
           {[...testimonials, ...testimonials].map((t, i) => (
             <div key={i} className="w-[400px] inline-flex flex-col justify-between whitespace-normal bg-zinc-900 border border-white/5 hover:border-rose-500/30 p-8 rounded-lg shrink-0 transition-colors">
@@ -597,7 +605,7 @@ const FAQ = () => {
         <div className="space-y-4">
           {faqs.map((faq, i) => (
             <div key={i} className="bg-zinc-900/80 border border-white/10 rounded-lg overflow-hidden transition-colors hover:border-white/20">
-              <button 
+              <button
                 className="w-full px-6 py-4 flex justify-between items-center text-left focus:outline-none"
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
               >
@@ -610,7 +618,7 @@ const FAQ = () => {
               </button>
               <AnimatePresence>
                 {openIndex === i && (
-                  <motion.div 
+                  <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
@@ -633,11 +641,11 @@ const CTA = () => {
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-zinc-950"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-rose-500/20 rounded-full blur-[150px] pointer-events-none"></div>
-      
+
       <div className="max-w-4xl mx-auto px-4 relative z-10 text-center border border-white/10 bg-zinc-900/60 backdrop-blur-xl rounded-xl p-12 md:p-20 shadow-2xl">
         <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">Ready to make your next session interactive?</h2>
         <p className="text-xl text-zinc-300 mb-10 max-w-2xl mx-auto">Create a live poll in minutes and understand your audience instantly. Free to get started.</p>
-        
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
             <Link to="/dashboard" className="w-full px-8 py-4 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-lg transition-colors text-lg shadow-[0_0_20px_rgba(244,63,94,0.4)] flex justify-center">
@@ -669,7 +677,7 @@ const Footer = () => {
             </div>
             <p className="text-zinc-500 text-sm mb-6">Real-time live polling and audience response platform for modern teams and educators.</p>
           </div>
-          
+
           <div>
             <h4 className="text-white font-semibold mb-4">Product</h4>
             <ul className="space-y-3">
@@ -678,7 +686,7 @@ const Footer = () => {
               <li><a href="#how-it-works" className="text-zinc-500 hover:text-rose-400 text-sm transition-colors">How It Works</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="text-white font-semibold mb-4">Resources</h4>
             <ul className="space-y-3">
@@ -686,7 +694,7 @@ const Footer = () => {
               <li><a href="#" className="text-zinc-500 hover:text-rose-400 text-sm transition-colors">FAQ</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="text-white font-semibold mb-4">Account</h4>
             <ul className="space-y-3">
@@ -696,7 +704,7 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-zinc-600 text-sm">© {new Date().getFullYear()} PulseBoard. All rights reserved.</p>
           <div className="flex items-center gap-6">

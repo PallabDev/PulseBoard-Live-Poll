@@ -14,12 +14,12 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 const BACKEND_URL = 'http://localhost:3000';
 
 const CHART_COLORS = [
-    'hsl(162, 84%, 45%)',
-    'hsl(217, 91%, 60%)',
-    'hsl(280, 78%, 62%)',
-    'hsl(32, 95%, 55%)',
-    'hsl(346, 87%, 59%)',
-    'hsl(190, 95%, 45%)',
+    '#f43f5e', // rose-500
+    '#f97316', // orange-500
+    '#f59e0b', // amber-500
+    '#06b6d4', // cyan-500
+    '#3b82f6', // blue-500
+    '#d946ef', // fuchsia-500
 ];
 
 interface AnalyticsSnapshot {
