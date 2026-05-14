@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle2, BarChart3, ShieldAlert, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 const FINGERPRINT_KEY = 'pulseboard-fingerprint';
 const RESULT_COLORS = ['#10b981', '#3b82f6', '#a855f7', '#f59e0b', '#ec4899', '#06b6d4'];
 
@@ -130,7 +130,9 @@ export const PublicPoll: React.FC = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [identitySaved, setIdentitySaved] = useState(false);
-    const [answeredQuestions, setAnsweredQuestions] = useState<Record<string, string>>({});
+    const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
+    const [submittedQuestionIds, setSubmittedQuestionIds] = useState<Record<string, boolean>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
@@ -197,14 +199,33 @@ export const PublicPoll: React.FC = () => {
         return fp;
     }, []);
 
-    const handleVote = (questionId: string, optionId: string) => {
+    const handleSubmitFeedback = () => {
         if (!socket || !socketReady || (!snapshot?.poll?._id && !snapshot?.poll?.id)) {
             toast.error("Live connection not ready");
             return;
         }
 
+        const missingRequiredQuestion = snapshot.questions.find((question: any) => (
+            question.isRequired !== false && !selectedAnswers[question._id || question.id]
+        ));
+
+        if (missingRequiredQuestion) {
+            toast.error(`Question ${missingRequiredQuestion.questionNumber} is mandatory`);
+            return;
+        }
+
         const pollId = snapshot!.poll._id || snapshot!.poll.id;
-        const payload: any = { pollId, questionId, optionId };
+        const answers = Object.entries(selectedAnswers).map(([questionId, optionId]) => ({
+            questionId,
+            optionId,
+        }));
+
+        if (answers.length === 0) {
+            toast.error("Please answer at least one question before submitting");
+            return;
+        }
+
+        const payload: any = { pollId, answers };
 
         if (isAuthenticated) {
             if (accessToken) {
@@ -224,12 +245,19 @@ export const PublicPoll: React.FC = () => {
             return;
         }
 
-        socket.emit('public:vote:submit', payload, (ack: any) => {
+        setIsSubmitting(true);
+        socket.emit('public:votes:submit', payload, (ack: any) => {
+            setIsSubmitting(false);
             if (ack?.success) {
-                setAnsweredQuestions(prev => ({ ...prev, [questionId]: optionId }));
-                toast.success("Vote recorded!");
+                setSubmittedQuestionIds(
+                    answers.reduce<Record<string, boolean>>((acc, answer) => {
+                        acc[answer.questionId] = true;
+                        return acc;
+                    }, {})
+                );
+                toast.success("Feedback submitted!");
             } else {
-                toast.error(ack?.message || "Failed to submit vote");
+                toast.error(ack?.message || "Failed to submit feedback");
             }
         });
     };
@@ -380,8 +408,10 @@ export const PublicPoll: React.FC = () => {
                         </div>
                     ) : (
                         questions.map((q: any) => {
-                            const selectedOptionId = answeredQuestions[q._id || q.id];
-                            const isDisabled = requiresSignin || (needsIdentity && !identitySaved) || !!selectedOptionId || poll.status !== 'active' || isExpired;
+                            const questionId = q._id || q.id;
+                            const selectedOptionId = selectedAnswers[questionId];
+                            const isSubmitted = submittedQuestionIds[questionId];
+                            const isDisabled = requiresSignin || (needsIdentity && !identitySaved) || isSubmitted || poll.status !== 'active' || isExpired || isSubmitting;
 
                             return (
                                 <Card key={q._id || q.id} className="border-zinc-800 bg-zinc-900/40 backdrop-blur-md overflow-hidden transition-all hover:bg-zinc-900/60">
@@ -390,11 +420,16 @@ export const PublicPoll: React.FC = () => {
                                             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                                                 Question {q.questionNumber}
                                             </span>
-                                            {selectedOptionId && (
+                                            <div className="flex items-center gap-2">
+                                            <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${q.isRequired === false ? 'border-zinc-700 text-zinc-500' : 'border-amber-500/30 bg-amber-500/10 text-amber-300'}`}>
+                                                {q.isRequired === false ? 'Optional' : 'Mandatory'}
+                                            </span>
+                                            {isSubmitted && (
                                                 <span className="flex items-center gap-1 text-xs font-medium text-emerald-500">
-                                                    <CheckCircle2 className="h-3 w-3" /> Answered
+                                                    <CheckCircle2 className="h-3 w-3" /> Submitted
                                                 </span>
                                             )}
+                                            </div>
                                         </div>
                                         <CardTitle className="text-xl mt-2 font-medium leading-relaxed">
                                             <div 
@@ -411,7 +446,10 @@ export const PublicPoll: React.FC = () => {
                                                     <button
                                                         key={opt._id || opt.id}
                                                         disabled={isDisabled}
-                                                        onClick={() => handleVote(q._id || q.id, opt._id || opt.id)}
+                                                        onClick={() => setSelectedAnswers((current) => ({
+                                                            ...current,
+                                                            [questionId]: opt._id || opt.id,
+                                                        }))}
                                                         className={`
                                                             group relative flex w-full items-center rounded-xl border p-4 text-left transition-all duration-200
                                                             ${isSelected 
@@ -435,6 +473,18 @@ export const PublicPoll: React.FC = () => {
                                 </Card>
                             );
                         })
+                    )}
+                    {canShowQuestions && questions.length > 0 && (
+                        <div className="sticky bottom-4 z-20 rounded-xl border border-zinc-800 bg-zinc-950/90 p-4 backdrop-blur-md">
+                            <Button
+                                onClick={handleSubmitFeedback}
+                                disabled={requiresSignin || (needsIdentity && !identitySaved) || poll.status !== 'active' || isExpired || isSubmitting || Object.keys(submittedQuestionIds).length > 0}
+                                className="w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
+                            >
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                                {Object.keys(submittedQuestionIds).length > 0 ? 'Feedback Submitted' : 'Submit Feedback'}
+                            </Button>
+                        </div>
                     )}
                 </div>
                 )}

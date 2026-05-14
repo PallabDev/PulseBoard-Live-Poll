@@ -2,19 +2,33 @@ import type mongoose from "mongoose";
 import { Poll, Question } from "./model.js";
 import Vote from "../vote/model.js";
 import ApiError from "../../common/utils/ApiError.js";
+import { sanitizeRichText } from "../../common/utils/sanitizeHtml.js";
 
 import type { ICreatePoll, ICreateQuestion, IUpdateOption, IUpdatePoll, IUpdateQuestion, IUpdateQuestionOrder } from "./validator.js"
 type CreatePollServiceInput = ICreatePoll & {
     userId: mongoose.Types.ObjectId;
 };
-export const createPollService = async ({ pollName, pollDescription, pollDurationInMinutes, isAnonymousAllowed, userId }: CreatePollServiceInput) => {
+const expireActivePolls = async (filter: Record<string, unknown> = {}) => {
+    await Poll.updateMany(
+        {
+            ...filter,
+            status: "active",
+            pollEndTime: { $lte: new Date() },
+        },
+        { $set: { status: "ended" } }
+    );
+};
+
+export const createPollService = async ({ pollName, pollDescription, pollDurationInMinutes, isAnonymousAllowed, status, userId }: CreatePollServiceInput) => {
+    const startTime = status === "active" ? new Date() : null;
     const poll = new Poll({
         pollName,
-        pollDescription,
+        pollDescription: sanitizeRichText(pollDescription),
         pollDurationInMinutes,
-        pollStartTime: null,
-        pollEndTime: null,
+        pollStartTime: startTime,
+        pollEndTime: startTime ? new Date(startTime.getTime() + pollDurationInMinutes * 60 * 1000) : null,
         isAnonymousAllowed,
+        status: status ?? "draft",
         createdBy: userId
     });
     const savedPoll = await poll.save();
@@ -24,10 +38,26 @@ export const createPollService = async ({ pollName, pollDescription, pollDuratio
 
 type CreateQuestionServiceInput = ICreateQuestion & {
     pollId: string;
+    userId: mongoose.Types.ObjectId;
 };
 
-export const createQuestionService = async ({ question, pollId, questionNumber, options }: CreateQuestionServiceInput) => {
-    const questionObj = new Question({ question, pollId, questionNumber, options });
+export const createQuestionService = async ({ question, pollId, userId, questionNumber, isRequired, options }: CreateQuestionServiceInput) => {
+    const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
+
+    if (!poll) {
+        throw new ApiError(404, "Poll not found");
+    }
+
+    const questionObj = new Question({
+        question: sanitizeRichText(question),
+        pollId,
+        questionNumber,
+        isRequired,
+        options: options.map((option) => ({
+            ...option,
+            text: sanitizeRichText(option.text),
+        })),
+    });
     const savedQuestion = await questionObj.save();
     return savedQuestion;
 }
@@ -39,7 +69,7 @@ type UpdateQuestionServiceInput = IUpdateQuestion & {
     userId: mongoose.Types.ObjectId;
 };
 
-export const updateQuestionService = async ({ pollId, questionId, userId, question, options }: UpdateQuestionServiceInput) => {
+export const updateQuestionService = async ({ pollId, questionId, userId, question, isRequired, options }: UpdateQuestionServiceInput) => {
     const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
 
     if (!poll) {
@@ -53,7 +83,11 @@ export const updateQuestionService = async ({ pollId, questionId, userId, questi
     }
 
     if (question !== undefined) {
-        questionDoc.question = question;
+        questionDoc.question = sanitizeRichText(question);
+    }
+
+    if (isRequired !== undefined) {
+        questionDoc.isRequired = isRequired;
     }
 
     if (options !== undefined) {
@@ -85,14 +119,14 @@ export const updateQuestionService = async ({ pollId, questionId, userId, questi
 
                 return {
                     _id: existingOption._id,
-                    text: option.text,
+                    text: sanitizeRichText(option.text),
                     order: option.order,
                     votes: existingOption.votes ?? 0,
                 };
             }
 
             return {
-                text: option.text,
+                text: sanitizeRichText(option.text),
                 order: option.order,
                 votes: 0,
             };
@@ -176,7 +210,7 @@ export const updateOptionService = async ({ pollId, questionId, optionId, userId
         throw new ApiError(404, "Option not found");
     }
 
-    optionDoc.text = text;
+    optionDoc.text = sanitizeRichText(text);
 
     const updatedQuestion = await questionDoc.save();
     return updatedQuestion;
@@ -241,7 +275,7 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
     }
 
     if (pollDescription !== undefined) {
-        poll.pollDescription = pollDescription;
+        poll.pollDescription = sanitizeRichText(pollDescription);
     }
 
     if (pollDurationInMinutes !== undefined) {
@@ -259,6 +293,14 @@ export const updatePollService = async ({ pollId, userId, pollName, pollDescript
     }
 
     if (isResultPublished !== undefined) {
+        if (isResultPublished && poll.status === "active" && poll.pollEndTime && poll.pollEndTime.getTime() <= Date.now()) {
+            poll.status = "ended";
+        }
+
+        if (isResultPublished && poll.status !== "ended") {
+            throw new ApiError(400, "Poll results can only be published after the poll has ended");
+        }
+
         poll.isResultPublished = isResultPublished;
     }
 
@@ -298,11 +340,13 @@ export const deletePollService = async ({ pollId, userId }: DeletePollServiceInp
 }
 
 export const getAllPollsService = async (userId: mongoose.Types.ObjectId) => {
+    await expireActivePolls({ createdBy: userId });
     const polls = await Poll.find({ createdBy: userId }).sort({ createdAt: -1 });
     return polls;
 }
 
 export const getPollByIdService = async (pollId: string, userId: mongoose.Types.ObjectId) => {
+    await expireActivePolls({ _id: pollId, createdBy: userId });
     const poll = await Poll.findOne({ _id: pollId, createdBy: userId });
     
     if (!poll) {

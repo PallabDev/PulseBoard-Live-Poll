@@ -11,7 +11,7 @@ import { Loader2, ArrowLeft, Users, MousePointerClick, ShieldCheck, Clock, Send,
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const CHART_COLORS = [
     '#f43f5e', // rose-500
@@ -81,7 +81,7 @@ const CountdownTimer: React.FC<{ endTime: string | null }> = ({ endTime }) => {
 export const LiveAnalytics: React.FC = () => {
     const { analyticsCode } = useParams();
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, accessToken } = useAuth();
 
     const [isLoading, setIsLoading] = useState(true);
     const [snapshot, setSnapshot] = useState<AnalyticsSnapshot | null>(null);
@@ -113,6 +113,7 @@ export const LiveAnalytics: React.FC = () => {
         const newSocket = io(BACKEND_URL, {
             transports: ["websocket", "polling"],
             withCredentials: true,
+            auth: accessToken ? { accessToken } : undefined,
         });
 
         newSocket.on('connect', () => {
@@ -135,7 +136,7 @@ export const LiveAnalytics: React.FC = () => {
         return () => {
             newSocket.disconnect();
         };
-    }, [analyticsCode, isLoading]);
+    }, [analyticsCode, isLoading, accessToken]);
 
     if (isLoading) {
         return (

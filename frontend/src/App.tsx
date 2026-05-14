@@ -49,8 +49,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/join/:shareCode" element={<PublicPoll />} />
-          <Route path="/analytics/:analyticsCode" element={<LiveAnalytics />} />
-          <Route path="/analytics/:analyticsCode/summary" element={<ParticipantSummary />} />
+          <Route path="/analytics/:analyticsCode" element={<ProtectedRoute><LiveAnalytics /></ProtectedRoute>} />
+          <Route path="/analytics/:analyticsCode/summary" element={<ProtectedRoute><ParticipantSummary /></ProtectedRoute>} />
 
           {/* Protected Dashboard Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

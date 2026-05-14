@@ -81,6 +81,7 @@ export interface IQuestion {
     question: string;
     pollId: mongoose.Types.ObjectId;
     questionNumber: number;
+    isRequired: boolean;
     options: IOption[];
     createdAt: Date;
     updatedAt: Date;
@@ -118,6 +119,11 @@ const QuestionSchema: Schema = new Schema<IQuestion>({
             },
             message: 'Options must contain between 2 and 4 items'
         }
+    },
+    isRequired: {
+        type: Boolean,
+        required: true,
+        default: true,
     },
     questionNumber: { type: Number, required: true },
 }, { timestamps: true });

@@ -332,9 +332,14 @@ const AnalyticsShowcase = () => {
                         </ul>
 
                         <div className="flex gap-4">
-                            <Link to="/signin">
-                                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-3 bg-white text-zinc-950 font-semibold rounded-md hover:bg-zinc-200 transition-colors shadow-lg">Explore Analytics</motion.button>
-                            </Link>
+                            <motion.a
+                                href="/signin"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-6 py-3 bg-white text-zinc-950 font-semibold rounded-md hover:bg-zinc-200 transition-colors shadow-lg"
+                            >
+                                Explore Analytics
+                            </motion.a>
                         </div>
                     </div>
 

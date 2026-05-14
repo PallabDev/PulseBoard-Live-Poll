@@ -12,7 +12,7 @@ export const getPublicPoll = async (req: Request, res: Response) => {
     }
 
     try {
-        const snapshot = await getPublicPollSnapshotByShareCode(result.data.shareCode);
+        const snapshot = await getPublicPollSnapshotByShareCode(result.data.shareCode, req.user?._id);
         return res.status(200).json(ApiResponse.success('Poll fetched successfully', snapshot));
     } catch (error) {
         if (error instanceof ApiError) {
@@ -32,7 +32,7 @@ export const getPublicAnalytics = async (req: Request, res: Response) => {
     }
 
     try {
-        const snapshot = await getPublicAnalyticsSnapshotByCode(result.data.analyticsCode);
+        const snapshot = await getPublicAnalyticsSnapshotByCode(result.data.analyticsCode, req.user!._id);
         return res.status(200).json(ApiResponse.success('Analytics fetched successfully', snapshot));
     } catch (error) {
         if (error instanceof ApiError) {
@@ -60,7 +60,8 @@ export const getParticipantSummary = async (req: Request, res: Response) => {
         const summary = await getParticipantSummaryByAnalyticsCode(
             paramsResult.data.analyticsCode,
             queryResult.data.page,
-            queryResult.data.limit
+            queryResult.data.limit,
+            req.user!._id
         );
         return res.status(200).json(ApiResponse.success('Participant summary fetched successfully', summary));
     } catch (error) {

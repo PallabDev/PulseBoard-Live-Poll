@@ -74,6 +74,7 @@ export const createPollSchema = z.object({
         message: "Poll duration can not be more than 30 minutes",
     }),
     isAnonymousAllowed: z.boolean().default(false),
+    status: z.enum(["draft", "active"]).optional(),
 });
 
 export const updatePollSchema = z.object({
@@ -101,6 +102,7 @@ export const updatePollSchema = z.object({
 
 export const createQuestionSchema = z.object({
     question: richTextString("Question", 3),
+    isRequired: z.boolean().default(true),
 
     questionNumber: z
         .number()
@@ -123,6 +125,7 @@ export const createQuestionSchema = z.object({
 
 export const updateQuestionSchema = z.object({
     question: richTextString("Question", 3).optional(),
+    isRequired: z.boolean().optional(),
     options: z
         .array(updateQuestionOptionSchema)
         .min(2, {
@@ -133,7 +136,7 @@ export const updateQuestionSchema = z.object({
         })
         .optional(),
 }).superRefine((data, ctx) => {
-    if (data.question === undefined && data.options === undefined) {
+    if (data.question === undefined && data.options === undefined && data.isRequired === undefined) {
         ctx.addIssue({
             code: "custom",
             message: "At least one field is required to update the question",

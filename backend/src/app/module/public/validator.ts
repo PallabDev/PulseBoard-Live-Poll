@@ -47,4 +47,48 @@ export const submitVoteSocketSchema = z.object({
     }
 });
 
+export const submitVotesSocketSchema = z.object({
+    pollId: z.string().trim().min(1, {
+        message: 'Poll id is required',
+    }),
+    answers: z
+        .array(
+            z.object({
+                questionId: z.string().trim().min(1, {
+                    message: 'Question id is required',
+                }),
+                optionId: z.string().trim().min(1, {
+                    message: 'Option id is required',
+                }),
+            })
+        )
+        .min(1, {
+            message: 'At least one answer is required',
+        }),
+    accessToken: z.string().trim().min(1).optional(),
+    userFingerPrint: z.string().trim().min(1).optional(),
+    firstName: z.string().trim().min(1).optional(),
+    lastName: z.string().trim().min(1).optional(),
+}).superRefine((data, ctx) => {
+    const anonymousFields = [data.userFingerPrint, data.firstName, data.lastName].filter(Boolean);
+
+    if (!data.accessToken && anonymousFields.length > 0 && anonymousFields.length < 3) {
+        ctx.addIssue({
+            code: 'custom',
+            message: 'Anonymous voting requires fingerprint, first name, and last name',
+            path: ['userFingerPrint'],
+        });
+    }
+
+    const questionIds = data.answers.map((answer) => answer.questionId);
+    if (new Set(questionIds).size !== questionIds.length) {
+        ctx.addIssue({
+            code: 'custom',
+            message: 'Only one answer is allowed per question',
+            path: ['answers'],
+        });
+    }
+});
+
 export type ISubmitVoteSocket = z.infer<typeof submitVoteSocketSchema>;
+export type ISubmitVotesSocket = z.infer<typeof submitVotesSocketSchema>;

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = 'http://localhost:3000'; // Default, should use env var in prod
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 export const api = axios.create({
     baseURL: `${BACKEND_URL}/api`,

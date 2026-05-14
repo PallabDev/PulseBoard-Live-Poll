@@ -23,6 +23,7 @@ interface OptionForm {
 interface QuestionForm {
     id: string;
     question: string;
+    isRequired: boolean;
     options: OptionForm[];
 }
 
@@ -53,6 +54,7 @@ export const PollBuilder: React.FC = () => {
         {
             id: `q-${Date.now()}`,
             question: '',
+            isRequired: true,
             options: [
                 { id: `o-${Date.now()}-1`, text: '', order: 1 },
                 { id: `o-${Date.now()}-2`, text: '', order: 2 },
@@ -82,6 +84,7 @@ export const PollBuilder: React.FC = () => {
                             setQuestions(apiQuestions.map((q: any) => ({
                                 id: q._id || q.id,
                                 question: q.question,
+                                isRequired: q.isRequired ?? true,
                                 options: q.options.map((o: any) => ({
                                     id: o._id || o.id,
                                     text: o.text,
@@ -143,6 +146,7 @@ export const PollBuilder: React.FC = () => {
                     if (q.id.startsWith('q-')) {
                         const newQRes = await pollService.createQuestion(currentPollId, {
                             question: q.question || '<p>Empty Question</p>',
+                            isRequired: q.isRequired,
                             questionNumber: i + 1,
                             options: q.options.map((o, index) => ({ text: o.text || 'Empty Option', order: index + 1 }))
                         });
@@ -154,15 +158,14 @@ export const PollBuilder: React.FC = () => {
                         }
                     } else {
                         await pollService.updateQuestion(currentPollId, q.id, {
-                            question: q.question
+                            question: q.question,
+                            isRequired: q.isRequired,
+                            options: q.options.map((o, index) => ({
+                                ...(o.id.startsWith('o-') ? {} : { _id: o.id }),
+                                text: o.text || 'Empty Option',
+                                order: index + 1,
+                            })),
                         });
-                        for (const o of q.options) {
-                            if (!o.id.startsWith('o-')) {
-                                await pollService.updateOption(currentPollId, q.id, o.id, {
-                                    text: o.text
-                                });
-                            }
-                        }
                         savedQuestions.push(q);
                     }
                 }
@@ -190,6 +193,7 @@ export const PollBuilder: React.FC = () => {
                         const q = questions[i];
                         await pollService.createQuestion(currentPollId!, {
                             question: q.question || '<p>Empty Question</p>',
+                            isRequired: q.isRequired,
                             questionNumber: i + 1,
                             options: q.options.map((o, index) => ({ text: o.text || 'Empty Option', order: index + 1 }))
                         });
@@ -214,6 +218,7 @@ export const PollBuilder: React.FC = () => {
             {
                 id: newId,
                 question: '',
+                isRequired: true,
                 options: [
                     { id: `o-${Date.now()}-1`, text: '', order: 1 },
                     { id: `o-${Date.now()}-2`, text: '', order: 2 },
@@ -273,6 +278,10 @@ export const PollBuilder: React.FC = () => {
 
     const updateQuestionText = (qId: string, text: string) => {
         setQuestions(questions.map(q => q.id === qId ? { ...q, question: text } : q));
+    };
+
+    const updateQuestionRequired = (qId: string, isRequired: boolean) => {
+        setQuestions(questions.map(q => q.id === qId ? { ...q, isRequired } : q));
     };
 
     const updateOptionText = (qId: string, oId: string, text: string) => {
@@ -417,6 +426,9 @@ export const PollBuilder: React.FC = () => {
                                                             <span className="truncate font-medium text-zinc-300">
                                                                 {q.question ? stripHtml(q.question) : 'Untitled Question'}
                                                             </span>
+                                                            <span className="mt-1 text-xs text-zinc-500">
+                                                                {q.isRequired ? 'Mandatory' : 'Optional'}
+                                                            </span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <Button
@@ -459,6 +471,17 @@ export const PollBuilder: React.FC = () => {
                     {editingQuestion && (
                         <div className="p-6 overflow-y-auto flex-1 space-y-8">
                             <div className="space-y-3">
+                                <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/30 p-4">
+                                    <div>
+                                        <Label className="text-base text-zinc-300">Mandatory Question</Label>
+                                        <p className="mt-1 text-sm text-zinc-500">Participants must answer this before submitting feedback.</p>
+                                    </div>
+                                    <Switch
+                                        checked={editingQuestion.isRequired}
+                                        onCheckedChange={(checked) => updateQuestionRequired(editingQuestion.id, checked)}
+                                        className="data-[state=checked]:bg-zinc-50"
+                                    />
+                                </div>
                                 <Label className="text-base text-zinc-300">Question Text</Label>
                                 <RichTextEditor
                                     content={editingQuestion.question}

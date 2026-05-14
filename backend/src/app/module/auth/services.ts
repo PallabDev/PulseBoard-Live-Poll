@@ -65,10 +65,9 @@ export const signinService = async (email: string, password: string) => {
         throw new ApiError(400, "Invalid email or password");
     }
 
-    // Removed for easier testing of existing accounts
-    // if (!user.isVerified) {
-    //     throw new ApiError(400, "User is not verified");
-    // }
+    if (!user.isVerified) {
+        throw new ApiError(400, "Please verify your email before signing in");
+    }
 
     const isPasswordValid = await compareHash(password, user.password);
     if (!isPasswordValid) {
@@ -78,8 +77,7 @@ export const signinService = async (email: string, password: string) => {
     // generate access and refresh tokens
     const { accessToken, refreshToken } = generateAccessRefreshToken({ userId: user._id });
 
-    // save refresh token to DB (plain string as JWT is too long for bcrypt)
-    user.refreshToken = refreshToken;
+    user.refreshToken = await generateHash(refreshToken);
     await user.save();
 
     return {
@@ -130,6 +128,7 @@ export const forgotPasswordService = async (email: string) => {
     // generate password reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
     user.passwordResetToken = await generateHash(resetToken);
+    user.passwordResetTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
     // send reset email
@@ -147,6 +146,7 @@ export const forgotPasswordService = async (email: string) => {
 export const resetPasswordService = async (token: string, newPassword: string) => {
     const users = await User.find({
         passwordResetToken: { $ne: null },
+        passwordResetTokenExpires: { $gt: new Date() },
     });
 
     let matchedUser = null;
@@ -164,6 +164,7 @@ export const resetPasswordService = async (token: string, newPassword: string) =
 
     matchedUser.password = await generateHash(newPassword);
     matchedUser.passwordResetToken = undefined;
+    matchedUser.passwordResetTokenExpires = undefined;
     await matchedUser.save();
 
     return toAuthUser(matchedUser);
@@ -189,16 +190,14 @@ export const refreshTokenService = async (incomingRefreshToken: string) => {
         throw new ApiError(401, "Refresh token has been revoked");
     }
 
-    // compare with stored refresh token (plain string)
-    if (incomingRefreshToken !== user.refreshToken) {
+    if (!await compareHash(incomingRefreshToken, user.refreshToken)) {
         throw new ApiError(401, "Refresh token does not match");
     }
 
     // generate new token pair
     const { accessToken, refreshToken } = generateAccessRefreshToken({ userId: user._id });
 
-    // save new refresh token to DB (rotation)
-    user.refreshToken = refreshToken;
+    user.refreshToken = await generateHash(refreshToken);
     await user.save();
 
     return {

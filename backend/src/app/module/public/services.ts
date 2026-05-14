@@ -2,18 +2,20 @@ import mongoose from 'mongoose';
 import ApiError from '../../common/utils/ApiError.js';
 import { Poll, Question } from '../poll/model.js';
 import Vote from '../vote/model.js';
+import { sanitizeRichText } from '../../common/utils/sanitizeHtml.js';
 
 const normalizeQuestion = (question: any) => ({
     id: String(question._id),
-    question: question.question,
+    question: sanitizeRichText(question.question),
     questionNumber: question.questionNumber,
+    isRequired: question.isRequired ?? true,
     options: Array.isArray(question.options)
         ? question.options
             .slice()
             .sort((a: any, b: any) => a.order - b.order)
             .map((option: any) => ({
                 id: String(option._id),
-                text: option.text,
+                text: sanitizeRichText(option.text),
                 order: option.order,
                 votes: option.votes ?? 0,
             }))
@@ -43,24 +45,33 @@ export const getPollVoteStats = async (pollId: mongoose.Types.ObjectId) => {
     };
 };
 
-export const getPublicPollSnapshotByShareCode = async (shareCode: string) => {
+const expirePollIfNeeded = async (poll: any) => {
+    if (poll.status === 'active' && poll.pollEndTime && poll.pollEndTime.getTime() <= Date.now()) {
+        await Poll.updateOne({ _id: poll._id }, { $set: { status: 'ended' } });
+        poll.status = 'ended';
+    }
+};
+
+export const getPublicPollSnapshotByShareCode = async (shareCode: string, viewerUserId?: mongoose.Types.ObjectId) => {
     const poll = await Poll.findOne({ shareCode }).lean();
 
     if (!poll) {
         throw new ApiError(404, 'Poll not found');
     }
 
+    await expirePollIfNeeded(poll);
+
     const questions = await Question.find({ pollId: poll._id })
         .sort({ questionNumber: 1 })
         .lean();
     const isExpired = poll.status === 'ended' || Boolean(poll.pollEndTime && poll.pollEndTime.getTime() <= Date.now());
-    const shouldExposeQuestions = !isExpired || Boolean(poll.isResultPublished);
+    const shouldExposeQuestions = Boolean(poll.isResultPublished) || (!isExpired && (poll.isAnonymousAllowed || viewerUserId));
 
     return {
         poll: {
             id: String(poll._id),
             pollName: poll.pollName,
-            pollDescription: poll.pollDescription,
+            pollDescription: sanitizeRichText(poll.pollDescription),
             pollDurationInMinutes: poll.pollDurationInMinutes,
             pollStartTime: poll.pollStartTime,
             pollEndTime: poll.pollEndTime,
@@ -91,12 +102,17 @@ export const getPublicPollSnapshotByShareCode = async (shareCode: string) => {
     };
 };
 
-export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) => {
-    const poll = await Poll.findOne({ analyticsCode }).lean();
+export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string, userId?: mongoose.Types.ObjectId) => {
+    const poll = await Poll.findOne({
+        analyticsCode,
+        ...(userId ? { createdBy: userId } : {}),
+    }).lean();
 
     if (!poll) {
         throw new ApiError(404, 'Poll not found');
     }
+
+    await expirePollIfNeeded(poll);
 
     const questions = await Question.find({ pollId: poll._id })
         .sort({ questionNumber: 1 })
@@ -107,7 +123,7 @@ export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) =>
         poll: {
             id: String(poll._id),
             pollName: poll.pollName,
-            pollDescription: poll.pollDescription,
+            pollDescription: sanitizeRichText(poll.pollDescription),
             pollDurationInMinutes: poll.pollDurationInMinutes,
             pollStartTime: poll.pollStartTime,
             pollEndTime: poll.pollEndTime,
@@ -123,12 +139,17 @@ export const getPublicAnalyticsSnapshotByCode = async (analyticsCode: string) =>
     };
 };
 
-export const getParticipantSummaryByAnalyticsCode = async (analyticsCode: string, page = 1, limit = 10) => {
-    const poll = await Poll.findOne({ analyticsCode }).lean();
+export const getParticipantSummaryByAnalyticsCode = async (analyticsCode: string, page = 1, limit = 10, userId?: mongoose.Types.ObjectId) => {
+    const poll = await Poll.findOne({
+        analyticsCode,
+        ...(userId ? { createdBy: userId } : {}),
+    }).lean();
 
     if (!poll) {
         throw new ApiError(404, 'Poll not found');
     }
+
+    await expirePollIfNeeded(poll);
 
     const questions = await Question.find({ pollId: poll._id })
         .sort({ questionNumber: 1 })
@@ -139,13 +160,13 @@ export const getParticipantSummaryByAnalyticsCode = async (analyticsCode: string
             String(question._id),
             {
                 questionNumber: question.questionNumber,
-                question: question.question,
+                question: sanitizeRichText(question.question),
                 options: new Map(
                     (question.options as any[]).map((option) => [
                         String(option._id),
                         {
                             id: String(option._id),
-                            text: option.text,
+                            text: sanitizeRichText(option.text),
                             order: option.order,
                         },
                     ])

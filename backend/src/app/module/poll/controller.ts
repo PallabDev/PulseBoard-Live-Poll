@@ -53,7 +53,11 @@ const createQuestion = async (req: Request, res: Response) => {
     }
 
     try {
-        const question = await createQuestionService({ pollId, ...result.data });
+        const question = await createQuestionService({
+            pollId,
+            userId: req.user!._id,
+            ...result.data,
+        });
         return res.status(201).json(ApiResponse.success("Question created successfully", question));
 
     }

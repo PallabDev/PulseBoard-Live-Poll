@@ -41,4 +41,33 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+export const optionalVerifyUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let accessToken;
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+            accessToken = req.headers.authorization.split(" ")[1];
+        } else if (req.cookies.accessToken) {
+            accessToken = req.cookies.accessToken;
+        } else if (req.body?.accessToken) {
+            accessToken = req.body.accessToken;
+        }
+
+        if (!accessToken) {
+            return next();
+        }
+
+        const decoded = verifyAccessToken(accessToken);
+        const userId = (decoded as { userId: string }).userId;
+        const user = await User.findById(userId);
+
+        if (user) {
+            req.user = user;
+        }
+
+        return next();
+    } catch {
+        return next();
+    }
+};
+
 export default verifyUser;

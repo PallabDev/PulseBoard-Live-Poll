@@ -32,6 +32,7 @@ export interface IQuestion {
     question: string;
     pollId: string;
     questionNumber: number;
+    isRequired?: boolean;
     options: IOption[];
     createdAt?: string;
     updatedAt?: string;
