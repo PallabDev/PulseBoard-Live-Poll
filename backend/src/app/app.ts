@@ -21,13 +21,14 @@ const apiLimiter = rateLimit({
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 50,
+    limit: 150,
     standardHeaders: true,
     legacyHeaders: false,
 });
 
 const createApp = () => {
     const app = express();
+    app.set('trust proxy', 1);
     app.use(helmet({
         crossOriginResourcePolicy: { policy: 'cross-origin' },
     }));

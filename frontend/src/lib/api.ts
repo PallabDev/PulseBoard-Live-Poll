@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -30,6 +31,10 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+
+        if (error.response && error.response.status === 429) {
+            toast.error("Too many requests. Please try again later.");
+        }
 
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {

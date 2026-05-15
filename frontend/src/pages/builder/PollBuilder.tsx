@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { RichTextEditor } from '../../components/shared/RichTextEditor';
-import { Loader2, ArrowLeft, Save, Plus, GripVertical, Trash2, Edit2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Save, Plus, GripVertical, Trash2, Edit2, BarChart3, Link2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
@@ -29,9 +29,10 @@ interface QuestionForm {
 
 // Strip HTML for the summary view
 const stripHtml = (html: string) => {
+    if (!html) return "";
     const tmp = document.createElement("DIV");
     tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || "Empty text...";
+    return (tmp.textContent || tmp.innerText || "").replace(/&nbsp;|&#160;/gi, " ").trim();
 };
 
 export const PollBuilder: React.FC = () => {
@@ -48,7 +49,9 @@ export const PollBuilder: React.FC = () => {
     const [pollDescription, setPollDescription] = useState('');
     const [pollDurationInMinutes, setPollDurationInMinutes] = useState(5);
     const [isAnonymousAllowed, setIsAnonymousAllowed] = useState(false);
-    const [status, setStatus] = useState<'draft' | 'active'>('draft');
+    const [status, setStatus] = useState<'draft' | 'active' | 'ended'>('draft');
+    const [shareCode, setShareCode] = useState<string | null>(null);
+    const [analyticsCode, setAnalyticsCode] = useState<string | null>(null);
 
     const [questions, setQuestions] = useState<QuestionForm[]>([
         {
@@ -79,6 +82,8 @@ export const PollBuilder: React.FC = () => {
                         setPollDurationInMinutes(poll.pollDurationInMinutes);
                         setIsAnonymousAllowed(poll.isAnonymousAllowed);
                         setStatus(poll.status as 'draft' | 'active');
+                        setShareCode(poll.shareCode);
+                        setAnalyticsCode(poll.analyticsCode);
 
                         if (apiQuestions && apiQuestions.length > 0) {
                             setQuestions(apiQuestions.map((q: any) => ({
@@ -113,9 +118,37 @@ export const PollBuilder: React.FC = () => {
             return;
         }
 
-        if (!pollName.trim()) {
-            toast.error("Poll name is required");
+        if (pollName.trim().length < 3) {
+            toast.error("Poll name must be at least 3 characters long");
             return;
+        }
+
+        if (stripHtml(pollDescription).length < 3) {
+            toast.error("Poll description must be at least 3 characters long");
+            return;
+        }
+
+        if (pollDurationInMinutes < 1 || pollDurationInMinutes > 30) {
+            toast.error("Poll duration must be between 1 and 30 minutes");
+            return;
+        }
+
+        for (let i = 0; i < questions.length; i++) {
+            const q = questions[i];
+            if (stripHtml(q.question).length < 3) {
+                toast.error(`Question ${i + 1} must be at least 3 characters long`);
+                return;
+            }
+            if (q.options.length < 2 || q.options.length > 4) {
+                toast.error(`Question ${i + 1} must have between 2 and 4 options`);
+                return;
+            }
+            for (let j = 0; j < q.options.length; j++) {
+                if (stripHtml(q.options[j].text).length < 1) {
+                    toast.error(`Option ${j + 1} in Question ${i + 1} cannot be empty`);
+                    return;
+                }
+            }
         }
 
         saveInFlightRef.current = true;
@@ -322,10 +355,44 @@ export const PollBuilder: React.FC = () => {
                     </h1>
                 </div>
                 <div className="ml-auto flex items-center gap-3">
+                    {isEditing && shareCode && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-zinc-400 hover:text-zinc-50"
+                            onClick={() => {
+                                if (status === 'ended') {
+                                    toast.warning('Poll is ended');
+                                    return;
+                                }
+                                if (status !== 'active') {
+                                    toast.warning('Please activate poll to share the poll');
+                                    return;
+                                }
+                                navigator.clipboard.writeText(`${window.location.origin}/join/${shareCode}`);
+                                toast.success('Share link copied to clipboard');
+                            }}
+                            title="Copy Share Link"
+                        >
+                            <Link2 className="h-5 w-5" />
+                        </Button>
+                    )}
+                    {isEditing && analyticsCode && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-zinc-400 hover:text-zinc-50"
+                            onClick={() => window.open(`${window.location.origin}/analytics/${analyticsCode}`, '_blank')}
+                            title="Open Analytics"
+                        >
+                            <BarChart3 className="h-5 w-5" />
+                        </Button>
+                    )}
                     <Button
                         variant="outline"
                         className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
                         onClick={() => setStatus(status === 'draft' ? 'active' : 'draft')}
+                        title="Activate the poll to allow sharing and responses"
                     >
                         Status: {status}
                     </Button>
@@ -424,7 +491,7 @@ export const PollBuilder: React.FC = () => {
                                                         <div className="flex-1 flex flex-col min-w-0 pr-4">
                                                             <span className="text-xs font-medium text-zinc-500 mb-1">Question {index + 1}</span>
                                                             <span className="truncate font-medium text-zinc-300">
-                                                                {q.question ? stripHtml(q.question) : 'Untitled Question'}
+                                                                {q.question ? (stripHtml(q.question) || 'Untitled Question') : 'Untitled Question'}
                                                             </span>
                                                             <span className="mt-1 text-xs text-zinc-500">
                                                                 {q.isRequired ? 'Mandatory' : 'Optional'}

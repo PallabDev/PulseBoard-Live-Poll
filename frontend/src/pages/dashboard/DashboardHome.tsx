@@ -119,7 +119,7 @@ export const DashboardHome: React.FC = () => {
                             <div className="px-6 py-3 border-t border-zinc-800/50 bg-zinc-950/30 flex gap-2 justify-between">
                                 <div className="flex gap-2">
                                     <Button variant="outline" size="sm" className="h-8 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50" onClick={() => navigate(`/dashboard/edit/${pollId}`)}>
-                                        <Edit2 className="h-3 w-3 mr-1" /> Edit
+                                        <Edit2 className="h-3 w-3 mr-1" /> Poll Workspace
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -131,10 +131,20 @@ export const DashboardHome: React.FC = () => {
                                     </Button>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => copyToClipboard(shareUrl, 'Share Link')} title="Copy Share Link">
+                                    <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => {
+                                        if (poll.status === 'ended') {
+                                            toast.warning('Poll is ended');
+                                            return;
+                                        }
+                                        if (poll.status !== 'active') {
+                                            toast.warning('Please activate poll to share the poll');
+                                            return;
+                                        }
+                                        copyToClipboard(shareUrl, 'Share Link');
+                                    }} title="Copy Share Link">
                                         <Link2 className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => copyToClipboard(analyticsUrl, 'Analytics Link')} title="Copy Analytics Link">
+                                    <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => window.open(analyticsUrl, '_blank')} title="Open Analytics">
                                         <BarChart3 className="h-4 w-4" />
                                     </Button>
                                 </div>

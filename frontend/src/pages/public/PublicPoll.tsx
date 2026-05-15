@@ -283,7 +283,7 @@ export const PublicPoll: React.FC = () => {
     const requiresSignin = !poll.isAnonymousAllowed && !isAuthenticated;
     const needsIdentity = poll.isAnonymousAllowed && !isAuthenticated && !identitySaved;
     const isExpired = poll.status === 'ended' || (poll.pollEndTime && new Date(poll.pollEndTime).getTime() <= now);
-    const canShowQuestions = !requiresSignin && !isExpired;
+    const canShowQuestions = !requiresSignin && !isExpired && poll.status === 'active';
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-50 selection:bg-zinc-800">
@@ -347,6 +347,18 @@ export const PublicPoll: React.FC = () => {
                             <div>
                                 <h3 className="mb-1 font-semibold text-amber-300">Poll expired</h3>
                                 <p className="text-sm text-amber-100/80">Questions are no longer visible. Results will appear here when the creator publishes them.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {poll.status !== 'active' && !poll.isResultPublished && !requiresSignin && !isExpired && (
+                    <Card className="mb-8 border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
+                        <CardContent className="flex items-center gap-4 p-6 text-blue-100">
+                            <Clock className="h-8 w-8 shrink-0 text-blue-400" />
+                            <div>
+                                <h3 className="mb-1 font-semibold text-blue-300">Poll is not active</h3>
+                                <p className="text-sm text-blue-100/80">This poll is currently in draft mode and is not accepting responses yet.</p>
                             </div>
                         </CardContent>
                     </Card>
