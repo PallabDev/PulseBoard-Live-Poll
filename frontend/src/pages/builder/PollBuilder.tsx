@@ -8,8 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { RichTextEditor } from '../../components/shared/RichTextEditor';
-import { Loader2, ArrowLeft, Save, Plus, GripVertical, Trash2, Edit2, BarChart3, Link2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Save, Plus, GripVertical, Trash2, Edit2, BarChart3, Link2, ChevronDown, CircleDashed, CirclePlay } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
@@ -26,6 +35,31 @@ interface QuestionForm {
     isRequired: boolean;
     options: OptionForm[];
 }
+
+type PollStatus = 'draft' | 'active' | 'ended';
+
+const STATUS_OPTIONS: Array<{
+    value: PollStatus;
+    label: string;
+    description: string;
+    icon: React.ElementType;
+    className: string;
+}> = [
+        {
+            value: 'draft',
+            label: 'Draft',
+            description: 'Keep editing. Participants cannot join yet.',
+            icon: CircleDashed,
+            className: 'text-zinc-400',
+        },
+        {
+            value: 'active',
+            label: 'Active',
+            description: 'Open the share link and accept responses.',
+            icon: CirclePlay,
+            className: 'text-emerald-400',
+        },
+    ];
 
 // Strip HTML for the summary view
 const stripHtml = (html: string) => {
@@ -49,7 +83,7 @@ export const PollBuilder: React.FC = () => {
     const [pollDescription, setPollDescription] = useState('');
     const [pollDurationInMinutes, setPollDurationInMinutes] = useState(5);
     const [isAnonymousAllowed, setIsAnonymousAllowed] = useState(false);
-    const [status, setStatus] = useState<'draft' | 'active' | 'ended'>('draft');
+    const [status, setStatus] = useState<PollStatus>('draft');
     const [shareCode, setShareCode] = useState<string | null>(null);
     const [analyticsCode, setAnalyticsCode] = useState<string | null>(null);
 
@@ -81,7 +115,7 @@ export const PollBuilder: React.FC = () => {
                         setPollDescription(poll.pollDescription);
                         setPollDurationInMinutes(poll.pollDurationInMinutes);
                         setIsAnonymousAllowed(poll.isAnonymousAllowed);
-                        setStatus(poll.status as 'draft' | 'active');
+                        setStatus((poll.status || 'draft') as PollStatus);
                         setShareCode(poll.shareCode);
                         setAnalyticsCode(poll.analyticsCode);
 
@@ -342,23 +376,25 @@ export const PollBuilder: React.FC = () => {
     }
 
     const editingQuestion = questions.find(q => q.id === editingQuestionId);
+    const selectedStatus = STATUS_OPTIONS.find((option) => option.value === status) || STATUS_OPTIONS[0];
+    const SelectedStatusIcon = selectedStatus.icon;
 
     return (
         <div className="space-y-6 pb-20">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-zinc-800 text-zinc-400 hover:text-zinc-50">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <div>
+                <div className="min-w-0">
                     <h1 className="text-3xl font-bold tracking-tight text-zinc-50">
                         {isEditing ? 'Edit Poll' : 'Create Poll'}
                     </h1>
                 </div>
-                <div className="ml-auto flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3 sm:ml-auto">
                     {isEditing && shareCode && (
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="sm"
                             className="text-zinc-400 hover:text-zinc-50"
                             onClick={() => {
                                 if (status === 'ended') {
@@ -374,28 +410,57 @@ export const PollBuilder: React.FC = () => {
                             }}
                             title="Copy Share Link"
                         >
-                            <Link2 className="h-5 w-5" />
+                            <Link2 className="mr-2 h-4 w-4" />
+                            Share
                         </Button>
                     )}
                     {isEditing && analyticsCode && (
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="sm"
                             className="text-zinc-400 hover:text-zinc-50"
                             onClick={() => window.open(`${window.location.origin}/analytics/${analyticsCode}`, '_blank')}
                             title="Open Analytics"
                         >
-                            <BarChart3 className="h-5 w-5" />
+                            <BarChart3 className="mr-2 h-4 w-4" />
+                            Analytics
                         </Button>
                     )}
-                    <Button
-                        variant="outline"
-                        className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
-                        onClick={() => setStatus(status === 'draft' ? 'active' : 'draft')}
-                        title="Activate the poll to allow sharing and responses"
-                    >
-                        Status: {status}
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+                                title="Choose how participants can access this poll"
+                            >
+                                <SelectedStatusIcon className={`mr-2 h-4 w-4 ${selectedStatus.className}`} />
+                                Status: {selectedStatus.label}
+                                <ChevronDown className="ml-2 h-4 w-4 text-zinc-500" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-72 border border-zinc-800 bg-zinc-950 p-2 text-zinc-100 shadow-xl">
+                            <DropdownMenuLabel className="px-2 text-zinc-500">Poll status</DropdownMenuLabel>
+                            <DropdownMenuSeparator className="bg-zinc-800" />
+                            <DropdownMenuRadioGroup value={status} onValueChange={(value) => setStatus(value as PollStatus)}>
+                                {STATUS_OPTIONS.map((option) => {
+                                    const StatusIcon = option.icon;
+                                    return (
+                                        <DropdownMenuRadioItem
+                                            key={option.value}
+                                            value={option.value}
+                                            className="items-start gap-3 px-2 py-2 text-zinc-200 focus:bg-zinc-800 focus:text-zinc-50"
+                                        >
+                                            <StatusIcon className={`mt-0.5 h-4 w-4 ${option.className}`} />
+                                            <span className="flex min-w-0 flex-col">
+                                                <span className="font-medium">{option.label}</span>
+                                                <span className="text-xs leading-snug text-zinc-500">{option.description}</span>
+                                            </span>
+                                        </DropdownMenuRadioItem>
+                                    );
+                                })}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button
                         onClick={handleSave}
                         disabled={isSaving}
@@ -462,7 +527,7 @@ export const PollBuilder: React.FC = () => {
                 </div>
 
                 <div className="lg:col-span-7 space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                         <h2 className="text-xl font-semibold text-zinc-50">Questions</h2>
                         <Button variant="outline" size="sm" onClick={addQuestion} className="border-zinc-700 hover:bg-zinc-800">
                             <Plus className="h-4 w-4 mr-2" /> Add Question
@@ -481,14 +546,14 @@ export const PollBuilder: React.FC = () => {
                                                     {...provided.draggableProps}
                                                     className="border-zinc-800 bg-zinc-900/40 backdrop-blur-sm group"
                                                 >
-                                                    <div className="flex items-center p-4">
+                                                    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
                                                         <div
                                                             {...provided.dragHandleProps}
-                                                            className="cursor-grab hover:text-zinc-300 text-zinc-500 mr-4"
+                                                            className="cursor-grab hover:text-zinc-300 text-zinc-500 sm:mr-4"
                                                         >
                                                             <GripVertical className="h-5 w-5" />
                                                         </div>
-                                                        <div className="flex-1 flex flex-col min-w-0 pr-4">
+                                                        <div className="flex-1 flex flex-col min-w-0 sm:pr-4">
                                                             <span className="text-xs font-medium text-zinc-500 mb-1">Question {index + 1}</span>
                                                             <span className="truncate font-medium text-zinc-300">
                                                                 {q.question ? (stripHtml(q.question) || 'Untitled Question') : 'Untitled Question'}
@@ -497,7 +562,7 @@ export const PollBuilder: React.FC = () => {
                                                                 {q.isRequired ? 'Mandatory' : 'Optional'}
                                                             </span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2 self-end sm:self-auto">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"

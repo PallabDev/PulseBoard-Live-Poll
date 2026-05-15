@@ -61,12 +61,12 @@ export const DashboardHome: React.FC = () => {
     return (
         <>
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                     <h1 className="text-3xl font-bold tracking-tight text-zinc-50">My Polls</h1>
                     <p className="text-zinc-400 mt-1">Manage and view analytics for your polls</p>
                 </div>
-                <Button onClick={() => navigate('/dashboard/create')} className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200">
+                <Button onClick={() => navigate('/dashboard/create')} className="w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200 sm:w-auto">
                     <Plus className="mr-2 h-4 w-4" /> Create Poll
                 </Button>
             </div>
@@ -116,8 +116,8 @@ export const DashboardHome: React.FC = () => {
                                 </div>
                             </CardContent>
 
-                            <div className="px-6 py-3 border-t border-zinc-800/50 bg-zinc-950/30 flex gap-2 justify-between">
-                                <div className="flex gap-2">
+                            <div className="flex flex-col gap-3 border-t border-zinc-800/50 bg-zinc-950/30 px-4 py-3 sm:px-6">
+                                <div className="flex flex-wrap gap-2">
                                     <Button variant="outline" size="sm" className="h-8 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50" onClick={() => navigate(`/dashboard/edit/${pollId}`)}>
                                         <Edit2 className="h-3 w-3 mr-1" /> Poll Workspace
                                     </Button>
@@ -130,7 +130,7 @@ export const DashboardHome: React.FC = () => {
                                         <Trash2 className="h-3 w-3 mr-1" /> Delete
                                     </Button>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                     <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => {
                                         if (poll.status === 'ended') {
                                             toast.warning('Poll is ended');
@@ -142,10 +142,12 @@ export const DashboardHome: React.FC = () => {
                                         }
                                         copyToClipboard(shareUrl, 'Share Link');
                                     }} title="Copy Share Link">
-                                        <Link2 className="h-4 w-4" />
+                                        <Link2 className="mr-2 h-4 w-4" />
+                                        Share link
                                     </Button>
                                     <Button variant="ghost" size="sm" className="h-8 px-2 text-zinc-400 hover:text-zinc-50" onClick={() => window.open(analyticsUrl, '_blank')} title="Open Analytics">
-                                        <BarChart3 className="h-4 w-4" />
+                                        <BarChart3 className="mr-2 h-4 w-4" />
+                                        Analytics
                                     </Button>
                                 </div>
                             </div>

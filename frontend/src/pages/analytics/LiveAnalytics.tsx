@@ -225,12 +225,12 @@ export const LiveAnalytics: React.FC = () => {
             <main className="relative z-10 mx-auto max-w-6xl p-4 md:p-8 space-y-8">
 
                 {/* Top Metrics Grid */}
-                <div className="grid grid-cols-3 gap-2 md:gap-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
                     <Card className="overflow-hidden border-emerald-500/20 bg-linear-to-br from-emerald-500/15 via-zinc-900/70 to-zinc-950 backdrop-blur-sm">
                         <CardContent className="p-3 md:p-6">
                             <div className="flex items-center justify-between space-y-0 pb-2">
                                 <p className="text-xs font-medium text-zinc-400 md:text-sm">Total Votes</p>
-                                <MousePointerClick className="hidden h-4 w-4 text-zinc-500 sm:block" />
+                                <MousePointerClick className="h-4 w-4 text-zinc-500" />
                             </div>
                             <div className="flex items-baseline space-x-2">
                                 <motion.h2
@@ -242,13 +242,14 @@ export const LiveAnalytics: React.FC = () => {
                                     {poll.totalVotes || 0}
                                 </motion.h2>
                             </div>
+                            <p className="mt-1 text-xs text-zinc-500">Answers submitted across every question.</p>
                         </CardContent>
                     </Card>
                     <Card className="overflow-hidden border-sky-500/20 bg-linear-to-br from-sky-500/15 via-zinc-900/70 to-zinc-950 backdrop-blur-sm">
                         <CardContent className="p-3 md:p-6">
                             <div className="flex items-center justify-between space-y-0 pb-2">
                                 <p className="text-xs font-medium text-zinc-400 md:text-sm">Participants</p>
-                                <Users className="hidden h-4 w-4 text-zinc-500 sm:block" />
+                                <Users className="h-4 w-4 text-zinc-500" />
                             </div>
                             <div className="flex items-baseline space-x-2">
                                 <motion.h2
@@ -260,19 +261,23 @@ export const LiveAnalytics: React.FC = () => {
                                     {poll.totalParticipants || 0}
                                 </motion.h2>
                             </div>
+                            <p className="mt-1 text-xs text-zinc-500">Unique voters counted for this poll.</p>
                         </CardContent>
                     </Card>
                     <Card className="overflow-hidden border-fuchsia-500/20 bg-linear-to-br from-fuchsia-500/15 via-zinc-900/70 to-zinc-950 backdrop-blur-sm">
                         <CardContent className="p-3 md:p-6">
                             <div className="flex items-center justify-between space-y-0 pb-2">
                                 <p className="text-xs font-medium text-zinc-400 md:text-sm">Access</p>
-                                <ShieldCheck className="hidden h-4 w-4 text-zinc-500 sm:block" />
+                                <ShieldCheck className="h-4 w-4 text-zinc-500" />
                             </div>
                             <div className="mt-2 flex items-baseline">
                                 <span className={`inline-flex max-w-full items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-tight md:px-2.5 md:text-xs ${poll.isAnonymousAllowed ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'}`}>
                                     {poll.isAnonymousAllowed ? 'Anonymous' : 'Login Only'}
                                 </span>
                             </div>
+                            <p className="mt-2 text-xs text-zinc-500">
+                                {poll.isAnonymousAllowed ? 'Anyone with the link can respond.' : 'Only signed-in users can respond.'}
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
