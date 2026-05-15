@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { LayoutDashboard, PlusSquare, LogOut, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext'
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ export const Sidebar: React.FC = () => {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-950">
                         <BarChart3 className="h-5 w-5" />
                     </div>
-                    <span className="text-lg font-bold text-zinc-50 tracking-tight">PulseBoard</span>
+                    <Link to="/" className="text-lg font-bold text-zinc-50 tracking-tight">PulseBoard</Link>
                 </div>
             </div>
 
