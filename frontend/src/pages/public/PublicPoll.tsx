@@ -136,6 +136,8 @@ export const PublicPoll: React.FC = () => {
     const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
+        if (authLoading) return;
+
         const loadPoll = async () => {
             if (!shareCode) return;
             try {
@@ -152,7 +154,7 @@ export const PublicPoll: React.FC = () => {
         };
 
         loadPoll();
-    }, [shareCode]);
+    }, [shareCode, authLoading]);
 
     useEffect(() => {
         if (!shareCode || isLoading || authLoading) return;
